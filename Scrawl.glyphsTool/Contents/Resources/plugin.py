@@ -172,8 +172,8 @@ class ScrawlTool(SelectTool):
 		Loc = editView.getActiveLocation_(event)
 		pad = int(round(layer.parent.parent.upm / 10))
 		loc_pixel = (
-			int(round((Loc.x + pad) / self.pixel_size)),
-			int(round((Loc.y + pad - master.descender) / self.pixel_size))
+			(Loc.x + pad) / self.pixel_size,
+			(Loc.y + pad - master.descender) / self.pixel_size
 		)
 		if self.prev_location is None or self.prev_location != loc_pixel:
 			#print(loc_pixel)
