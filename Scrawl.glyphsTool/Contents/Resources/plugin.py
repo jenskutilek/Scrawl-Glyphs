@@ -107,6 +107,7 @@ class ScrawlTool(SelectTool):
 		self.data = None
 		self.prev_location = None
 		self.erase = False
+		self.mouse_position = None
 
 	def start(self):
 		pass
@@ -126,7 +127,31 @@ class ScrawlTool(SelectTool):
 			setScrawl(layer, self.pen_size, self.pixel_size, self.data)
 	
 	def foreground(self, layer):
-		pass
+		try:
+			self.mouse_position = self.editViewController().graphicView().getActiveLocation_(Glyphs.currentEvent())
+		except:
+			self.logToConsole( "foreground: mouse_position: %s" % str(e) )
+			self.mouse_position = None
+			return
+
+		if self.mouse_position is not None:
+			x, y = self.mouse_position
+			scaled_pen = self.pen_size * self.pixel_size
+			half = scaled_pen / 2
+			rect = NSMakeRect(
+				x - half,
+				y - half,
+				scaled_pen,
+				scaled_pen
+			)
+			path = NSBezierPath.bezierPathWithOvalInRect_(rect)
+			path.setLineWidth_(1)
+			if self.erase:
+				NSColor.redColor().set()
+			else:
+				NSColor.lightGrayColor().set()
+			path.stroke()
+
 
 	def background(self, layer):
 		# draw pixels
@@ -150,6 +175,7 @@ class ScrawlTool(SelectTool):
 		# Toggle between draw and eraser mode
 		if event.characters() == "e":
 			self.erase = not(self.erase)
+			self.updateView()
 		else:
 			objc.super(ScrawlTool, self).keyDown_(event)
 
