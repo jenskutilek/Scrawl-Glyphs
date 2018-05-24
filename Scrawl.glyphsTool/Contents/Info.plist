@@ -5,15 +5,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleDisplayName</key>
-	<string>InstaVar</string>
+	<string>Scrawl</string>
 	<key>CFBundleExecutable</key>
 	<string>plugin</string>
 	<key>CFBundleIdentifier</key>
-	<string>de.kutilek.InstaVar</string>
+	<string>de.kutilek.ScrawlTool</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>InstaVar</string>
+	<string>Scrawl</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleVersion</key>
@@ -27,7 +27,7 @@
 	<key>productReleaseNotes</key>
 	<string>____LatestReleaseNotes____</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright, Jens Kutilek, 2017</string>
+	<string>Copyright, Jens Kutilek, 2018</string>
 	<key>NSPrincipalClass</key>
 	<string>ScrawlTool</string>
 	<key>PyMainFileNames</key>
