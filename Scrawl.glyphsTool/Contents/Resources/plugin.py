@@ -98,7 +98,8 @@ class ScrawlTool(SelectTool):
 		)
 
 		self.generalContextMenus = [
-			{"view": self.sliderMenuView.group.getNSView()}
+			{"view": self.sliderMenuView.group.getNSView()},
+			{"name": Glyphs.localize({'en': u'Delete Scrawl', 'de': u'Gekritzel löschen'}), "action": self.delete_data},
 		]
 		self.keyboardShortcut = 'c'
 		self.pen_size = default_pen_size
@@ -232,6 +233,11 @@ class ScrawlTool(SelectTool):
 		currentTabView = Glyphs.font.currentTab
 		if currentTabView:
 			currentTabView.graphicView().setNeedsDisplay_(True)
+
+	def delete_data(self, sender=None):
+		for layer in Glyphs.font.selectedLayers:
+			deleteScrawl(layer)
+		self.updateView()
 
 	def slider_callback(self, sender=None):
 		if sender is not None:
