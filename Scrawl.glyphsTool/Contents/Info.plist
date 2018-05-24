@@ -21,11 +21,11 @@
 	<key>CFBundleShortVersionString</key>
 	<string>0.1.0</string>
 	<key>UpdateFeedURL</key>
-	<string>____OnlineUrlToThisPlist____</string>
+	<string>https://raw.githubusercontent.com/jenskutilek/Scrawl-Glyphs/master/Scrawl.glyphsTool/Contents/Info.plist</string>
 	<key>productPageURL</key>
-	<string>____ProductPageURL____</string>
+	<string>https://github.com/jenskutilek/Scrawl-Glyphs/</string>
 	<key>productReleaseNotes</key>
-	<string>____LatestReleaseNotes____</string>
+	<string>Initial release.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright, Jens Kutilek, 2018</string>
 	<key>NSPrincipalClass</key>

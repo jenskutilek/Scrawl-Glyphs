@@ -19,11 +19,11 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.0.1</string>
+	<string>0.1.0</string>
 	<key>UpdateFeedURL</key>
 	<string>https://raw.githubusercontent.com/jenskutilek/Scrawl-Glyphs/master/Scrawl.glyphsReporter/Contents/Info.plist</string>
 	<key>productPageURL</key>
-	<string>https://github.com/jenskutilek/MasterGrid/</string>
+	<string>https://github.com/jenskutilek/Scrawl-Glyphs/</string>
 	<key>productReleaseNotes</key>
 	<string>Initial release.</string>
 	<key>NSHumanReadableCopyright</key>
