@@ -6,7 +6,7 @@ from math import floor
 from GlyphsApp import GSOFFCURVE, GSQCURVE, GSCURVE
 from GlyphsApp.plugins import *
 
-from AppKit import NSBezierPath, NSClassFromString, NSColor, NSData, NSGraphicsContext, NSImage, NSImageInterpolationNone, NSMakeRect, NSRoundLineCapStyle
+from AppKit import NSBezierPath, NSClassFromString, NSColor, NSData, NSGraphicsContext, NSImage, NSImageInterpolationNone, NSMakeRect, NSPoint, NSRoundLineCapStyle
 
 
 plugin_id = "de.kutilek.scrawl"
@@ -57,7 +57,7 @@ def setScrawl(layer, pen_size, pixel_size, data=None):
 		del layer.userData["%s.data" % plugin_id]
 	else:
 		tiff = data.TIFFRepresentation()
-		print("Saving %i bytes ..." % len(tiff))
+		#print("Saving %i bytes ..." % len(tiff))
 		layer.userData["%s.data" % plugin_id] = tiff
 
 
@@ -66,6 +66,26 @@ def deleteScrawl(layer):
 		full_key = "%s.%s" % (plugin_id, key)
 		if layer.userData[full_key] is not None:
 			del layer.userData[full_key]
+
+
+def saveScrawlToBackground(layer):
+	data = layer.userData["%s.data" % plugin_id]
+	font = layer.parent.parent
+	try:
+		master = font.masters[layer.layerId]
+	except KeyError:
+		return
+	if master is None:
+		return
+	pad = int(round(font.upm / 10))
+	if data is not None:
+		try:
+			data = NSImage.alloc().initWithData_(data)
+		except:
+			return
+		#layer.backgroundImage = GSBackgroundImage('/path/to/file.jpg')
+		#layer.backgroundImage.position = NSPoint(-pad, master.descender - pad)
+		#layer.backgroundImage.scale = (2 * pad + font.upm) / layer.backgroundImage.size().height
 
 
 
@@ -100,6 +120,7 @@ class ScrawlTool(SelectTool):
 		self.generalContextMenus = [
 			{"view": self.sliderMenuView.group.getNSView()},
 			{"name": Glyphs.localize({'en': u'Delete Scrawl', 'de': u'Gekritzel löschen'}), "action": self.delete_data},
+			{"name": Glyphs.localize({'en': u'Save Scrawl To Background Image', 'de': u'Gekritzel als Hintergrundbild speichern'}), "action": self.save_background},
 		]
 		self.keyboardShortcut = 'c'
 		self.pen_size = default_pen_size
@@ -108,9 +129,17 @@ class ScrawlTool(SelectTool):
 		self.prev_location = None
 		self.erase = False
 		self.mouse_position = None
+		self.layer = None
 
 	def start(self):
 		pass
+
+	def get_current_layer(self):
+		try:
+			editView = self.editViewController().graphicView()
+		except:
+			return None
+		return editView.activeLayer()
 
 	def activate(self):
 		if Glyphs.font.selectedLayers:
@@ -120,12 +149,6 @@ class ScrawlTool(SelectTool):
 			self.prev_location = None
 			#deleteScrawl(layer)
 
-	def deactivate(self):
-		if Glyphs.font.selectedLayers:
-			layer = Glyphs.font.selectedLayers[0]
-			# save data
-			setScrawl(layer, self.pen_size, self.pixel_size, self.data)
-	
 	def foreground(self, layer):
 		try:
 			self.mouse_position = self.editViewController().graphicView().getActiveLocation_(Glyphs.currentEvent())
@@ -154,6 +177,7 @@ class ScrawlTool(SelectTool):
 
 
 	def background(self, layer):
+		self.layer = layer
 		# draw pixels
 		if self.data is None:
 			return
@@ -181,19 +205,19 @@ class ScrawlTool(SelectTool):
 
 	def setPixel(self, event, dragging=False):
 		if self.data is None:
-			return
+			return False
 		try:
 			editView = self.editViewController().graphicView()
 		except:
-			return
+			return False
 		
 		layer = editView.activeLayer()
 		try:
 			master = layer.parent.parent.masters[layer.layerId]
 		except KeyError:
-			return
+			return False
 		if master is None:
-			return
+			return False
 		
 		Loc = editView.getActiveLocation_(event)
 		pad = int(round(layer.parent.parent.upm / 10))
@@ -232,6 +256,7 @@ class ScrawlTool(SelectTool):
 			#NSBezierPath.fillRect_(rect)
 			self.data.unlockFocus()
 			self.prev_location = loc_pixel
+		return True
 
 	def mouseDown_(self, event):
 		if event.clickCount() == 3:
@@ -240,16 +265,19 @@ class ScrawlTool(SelectTool):
 		if event.clickCount() == 2:
 			self.mouseDoubleDown_(event)
 			return
-		self.setPixel(event)
-		self.updateView()
+		if self.setPixel(event):
+			self.updateView()
 	
 	def mouseDragged_(self, event):
-		self.setPixel(event, True)
-		self.updateView()
+		if self.setPixel(event, True):
+			self.updateView()
 		
 	def mouseUp_(self, event):
-		self.setPixel(event)
-		self.updateView()
+		if self.setPixel(event):
+			layer = self.get_current_layer()
+			if layer is not None:
+				setScrawl(layer, self.pen_size, self.pixel_size, self.data)
+			self.updateView()
 
 	def __file__(self):
 		"""Please leave this method unchanged"""
@@ -264,6 +292,10 @@ class ScrawlTool(SelectTool):
 		for layer in Glyphs.font.selectedLayers:
 			deleteScrawl(layer)
 		self.updateView()
+
+	def save_background(self, sender=None):
+		for layer in Glyphs.font.selectedLayers:
+			saveScrawlToBackground(layer)
 
 	def slider_callback(self, sender=None):
 		if sender is not None:
