@@ -3,15 +3,16 @@ from __future__ import division, print_function
 
 import objc
 from math import floor
+from os.path import dirname, join
 from GlyphsApp import GSOFFCURVE, GSQCURVE, GSCURVE
 from GlyphsApp.plugins import *
 
-from AppKit import NSBezierPath, NSClassFromString, NSColor, NSData, NSGraphicsContext, NSImage, NSImageInterpolationNone, NSMakeRect, NSPoint, NSRoundLineCapStyle
+from AppKit import NSBezierPath, NSBitmapImageRep, NSClassFromString, NSColor, NSData, NSGraphicsContext, NSImage, NSImageInterpolationNone, NSMakeRect, NSPoint, NSRoundLineCapStyle, NSTIFFFileType
 
 
 plugin_id = "de.kutilek.scrawl"
 default_pen_size = 1
-default_pixel_size = 10
+default_pixel_size = 4
 
 
 def initImage(layer, pixel_size=default_pixel_size):
@@ -19,13 +20,14 @@ def initImage(layer, pixel_size=default_pixel_size):
 	pad = int(round(upm / 10))
 	w = int(round((2 * pad + layer.width) / pixel_size))
 	h = int(round((2 * pad + upm) / pixel_size))
-	img = NSImage.alloc().initWithSize_((w, h))
+	img = NSBitmapImageRep.alloc().initWithData_(NSData.dataWithContentsOfFile_(join(dirname(__file__), "empty.tif")))
 	# DEBUG: Draw a red rectangle around the image
-	#img.lockFocus()
-	#NSColor.redColor().set()
-	#NSBezierPath.setLineWidth_(1)
-	#NSBezierPath.strokeRect_(NSMakeRect(0, 0, w, h))
-	#img.unlockFocus()
+	if False:
+		img.lockFocus()
+		NSColor.blackColor().set()
+		NSBezierPath.setLineWidth_(1)
+		NSBezierPath.strokeRect_(NSMakeRect(0, 0, w, h))
+		img.unlockFocus()
 	return img
 
 
@@ -43,7 +45,7 @@ def getScrawl(layer):
 		data = initImage(layer, default_pixel_size)
 	else:
 		try:
-			data = NSImage.alloc().initWithData_(data)
+			data = NSBitmapImageRep.alloc().initWithData_(data)
 		except:
 			data = initImage(layer, default_pixel_size)
 
@@ -56,7 +58,8 @@ def setScrawl(layer, pen_size, pixel_size, data=None):
 	if data is None:
 		del layer.userData["%s.data" % plugin_id]
 	else:
-		tiff = data.TIFFRepresentation()
+		#tiff = data.TIFFRepresentation()
+		tiff = data.representationUsingType_properties_(NSTIFFFileType, None)
 		#print("Saving %i bytes ..." % len(tiff))
 		layer.userData["%s.data" % plugin_id] = tiff
 
@@ -228,7 +231,13 @@ class ScrawlTool(SelectTool):
 		if self.prev_location is None or self.prev_location != loc_pixel:
 			#print(loc_pixel)
 			x, y = loc_pixel
-			self.data.lockFocus()
+			#self.data.lockFocus()
+			print(self.data)
+			#NSGraphicsContext.saveGraphicsState()
+			current = NSGraphicsContext.currentContext()
+			context = NSGraphicsContext.graphicsContextWithBitmapImageRep_(self.data)
+			NSGraphicsContext.setCurrentContext_(context)
+			print("Context:", context)
 			if self.erase:
 				NSColor.whiteColor().set()
 			else:
@@ -254,7 +263,8 @@ class ScrawlTool(SelectTool):
 				path.fill()
 			# For rectangular pens:
 			#NSBezierPath.fillRect_(rect)
-			self.data.unlockFocus()
+			#NSGraphicsContext.restoreGraphicsState()
+			NSGraphicsContext.setCurrentContext_(current)
 			self.prev_location = loc_pixel
 		return True
 

@@ -26,7 +26,9 @@ class ScrawlReporter(ReporterPlugin):
 		currentController = self.controller.view().window().windowController()
 		if currentController:
 			tool = currentController.toolDrawDelegate()
-			if tool.isKindOfClass_(NSClassFromString("GlyphsToolText")) or tool.isKindOfClass_(NSClassFromString("GlyphsToolHand")) or tool.isKindOfClass_(NSClassFromString("ScrawlTool")):
+			if tool.isKindOfClass_(NSClassFromString("GlyphsToolText")) \
+				or tool.isKindOfClass_(NSClassFromString("GlyphsToolHand")) \
+				or tool.isKindOfClass_(NSClassFromString("ScrawlTool")):
 				return
 		
 		# find master for image positioning (descender)
