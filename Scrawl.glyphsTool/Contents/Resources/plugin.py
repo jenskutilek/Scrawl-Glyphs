@@ -7,11 +7,11 @@ from os.path import dirname, join
 from GlyphsApp import GSOFFCURVE, GSQCURVE, GSCURVE
 from GlyphsApp.plugins import *
 
-from AppKit import NSBezierPath, NSBitmapImageRep, NSClassFromString, NSColor, NSData, NSGraphicsContext, NSImage, NSImageInterpolationNone, NSMakeRect, NSPoint, NSRoundLineCapStyle, NSTIFFFileType
+from AppKit import NSBezierPath, NSBitmapImageRep, NSClassFromString, NSColor, NSData, NSDeviceWhiteColorSpace, NSGraphicsContext, NSImage, NSImageInterpolationNone, NSMakeRect, NSPoint, NSRoundLineCapStyle, NSTIFFFileType
 
 
 plugin_id = "de.kutilek.scrawl"
-default_pen_size = 1
+default_pen_size = 2
 default_pixel_size = 4
 
 
@@ -20,14 +20,39 @@ def initImage(layer, pixel_size=default_pixel_size):
 	pad = int(round(upm / 10))
 	w = int(round((2 * pad + layer.width) / pixel_size))
 	h = int(round((2 * pad + upm) / pixel_size))
-	img = NSBitmapImageRep.alloc().initWithData_(NSData.dataWithContentsOfFile_(join(dirname(__file__), "empty.tif")))
-	# DEBUG: Draw a red rectangle around the image
-	if False:
-		img.lockFocus()
-		NSColor.blackColor().set()
-		NSBezierPath.setLineWidth_(1)
-		NSBezierPath.strokeRect_(NSMakeRect(0, 0, w, h))
-		img.unlockFocus()
+	# See https://developer.apple.com/documentation/appkit/nsbitmapimagerep/1395538-init
+	img = NSBitmapImageRep.alloc().initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bitmapFormat_bytesPerRow_bitsPerPixel_(
+		None,   # BitmapDataPlanes
+		w,      # pixelsWide
+		h,      # pixelsHigh
+		8,      # bitsPerSample: 1, 2, 4, 8, 12, or 16
+		1,      # samplesPerPixel: 1 - 5
+		False,  # hasAlpha
+		False,  # isPlanar
+		NSDeviceWhiteColorSpace,  # colorSpaceName
+		0,      # bitmapFormat
+		0,      # bytesPerRow
+		0,      # bitsPerPixel
+	)
+	"""
+		NSCalibratedWhiteColorSpace
+		NSCalibratedBlackColorSpace
+		NSCalibratedRGBColorSpace
+		NSDeviceWhiteColorSpace
+		NSDeviceBlackColorSpace
+		NSDeviceRGBColorSpace
+		NSDeviceCMYKColorSpace
+		NSNamedColorSpace
+		NSCustomColorSpace
+	"""
+	# The image is filled black for some reason, make it white
+	current = NSGraphicsContext.currentContext()
+	context = NSGraphicsContext.graphicsContextWithBitmapImageRep_(img)
+	NSGraphicsContext.setCurrentContext_(context)
+	NSColor.whiteColor().set()
+	#NSBezierPath.setLineWidth_(1)
+	NSBezierPath.fillRect_(NSMakeRect(0, 0, w, h))
+	NSGraphicsContext.setCurrentContext_(current)
 	return img
 
 
@@ -58,9 +83,8 @@ def setScrawl(layer, pen_size, pixel_size, data=None):
 	if data is None:
 		del layer.userData["%s.data" % plugin_id]
 	else:
-		#tiff = data.TIFFRepresentation()
 		tiff = data.representationUsingType_properties_(NSTIFFFileType, None)
-		#print("Saving %i bytes ..." % len(tiff))
+		print("Saving %i bytes ..." % len(tiff))
 		layer.userData["%s.data" % plugin_id] = tiff
 
 
@@ -133,6 +157,7 @@ class ScrawlTool(SelectTool):
 		self.erase = False
 		self.mouse_position = None
 		self.layer = None
+		self.needs_save = False
 
 	def start(self):
 		pass
@@ -150,6 +175,7 @@ class ScrawlTool(SelectTool):
 			self.pen_size, self.pixel_size, self.data = getScrawl(layer)
 			self.w.pen_size.set(self.pen_size)
 			self.prev_location = None
+			self.needs_save = False
 			#deleteScrawl(layer)
 
 	def foreground(self, layer):
@@ -229,19 +255,19 @@ class ScrawlTool(SelectTool):
 			(Loc.y + pad - master.descender) / self.pixel_size
 		)
 		if self.prev_location is None or self.prev_location != loc_pixel:
-			#print(loc_pixel)
 			x, y = loc_pixel
-			#self.data.lockFocus()
-			print(self.data)
-			#NSGraphicsContext.saveGraphicsState()
 			current = NSGraphicsContext.currentContext()
 			context = NSGraphicsContext.graphicsContextWithBitmapImageRep_(self.data)
+			if context is None:
+				self.prev_location = loc_pixel
+				print("Could not get context in setPixel")
+				return False
+			NSGraphicsContext.saveGraphicsState()
 			NSGraphicsContext.setCurrentContext_(context)
-			print("Context:", context)
 			if self.erase:
 				NSColor.whiteColor().set()
 			else:
-				NSColor.darkGrayColor().set()
+				NSColor.blackColor().set()
 			if dragging and self.prev_location is not None:
 				px, py = self.prev_location
 				path = NSBezierPath.alloc().init()
@@ -251,6 +277,7 @@ class ScrawlTool(SelectTool):
 				path.moveToPoint_((px, py))
 				path.lineToPoint_((x, y))
 				path.stroke()
+				self.needs_save = True
 			else:
 				half = self.pen_size / 2
 				rect = NSMakeRect(
@@ -261,10 +288,11 @@ class ScrawlTool(SelectTool):
 				)
 				path = NSBezierPath.bezierPathWithOvalInRect_(rect)
 				path.fill()
+				self.needs_save = True
 			# For rectangular pens:
 			#NSBezierPath.fillRect_(rect)
-			#NSGraphicsContext.restoreGraphicsState()
 			NSGraphicsContext.setCurrentContext_(current)
+			NSGraphicsContext.restoreGraphicsState()
 			self.prev_location = loc_pixel
 		return True
 
@@ -284,10 +312,11 @@ class ScrawlTool(SelectTool):
 		
 	def mouseUp_(self, event):
 		if self.setPixel(event):
-			layer = self.get_current_layer()
-			if layer is not None:
-				setScrawl(layer, self.pen_size, self.pixel_size, self.data)
-			self.updateView()
+			if self.needs_save:
+				layer = self.get_current_layer()
+				if layer is not None:
+					setScrawl(layer, self.pen_size, self.pixel_size, self.data)
+				self.updateView()
 
 	def __file__(self):
 		"""Please leave this method unchanged"""
