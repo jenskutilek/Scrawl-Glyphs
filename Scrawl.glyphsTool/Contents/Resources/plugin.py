@@ -7,7 +7,7 @@ from os.path import dirname, join
 from GlyphsApp import GSOFFCURVE, GSQCURVE, GSCURVE
 from GlyphsApp.plugins import *
 
-from AppKit import NSBezierPath, NSBitmapImageRep, NSClassFromString, NSColor, NSData, NSDeviceWhiteColorSpace, NSGraphicsContext, NSImage, NSImageInterpolationNone, NSMakeRect, NSPoint, NSRoundLineCapStyle, NSTIFFFileType
+from AppKit import NSBezierPath, NSBitmapImageRep, NSClassFromString, NSColor, NSData, NSDeviceWhiteColorSpace, NSGraphicsContext, NSImage, NSImageInterpolationNone, NSMakeRect, NSPNGFileType, NSPoint, NSRoundLineCapStyle, NSTIFFFileType
 
 
 plugin_id = "de.kutilek.scrawl"
@@ -70,6 +70,8 @@ def getScrawl(layer):
 		data = initImage(layer, default_pixel_size)
 	else:
 		try:
+			# FIXME: The loaded image rep is not in the same format as the blank image.
+			# It takes up twice the space as PNG. (RGB instead of grey?)
 			data = NSBitmapImageRep.alloc().initWithData_(data)
 		except:
 			data = initImage(layer, default_pixel_size)
@@ -83,9 +85,9 @@ def setScrawl(layer, pen_size, pixel_size, data=None):
 	if data is None:
 		del layer.userData["%s.data" % plugin_id]
 	else:
-		tiff = data.representationUsingType_properties_(NSTIFFFileType, None)
-		print("Saving %i bytes ..." % len(tiff))
-		layer.userData["%s.data" % plugin_id] = tiff
+		imgdata = data.representationUsingType_properties_(NSPNGFileType, None)
+		print("Saving PNG with %i bytes ..." % len(imgdata))
+		layer.userData["%s.data" % plugin_id] = imgdata
 
 
 def deleteScrawl(layer):
