@@ -7,12 +7,12 @@ from os.path import dirname, join
 from GlyphsApp import GSOFFCURVE, GSQCURVE, GSCURVE
 from GlyphsApp.plugins import *
 
-from AppKit import NSBezierPath, NSBitmapImageRep, NSClassFromString, NSColor, NSData, NSDeviceWhiteColorSpace, NSGraphicsContext, NSImage, NSImageInterpolationNone, NSMakeRect, NSPNGFileType, NSPoint, NSRoundLineCapStyle, NSTIFFFileType
+from AppKit import NSBezierPath, NSBitmapImageRep, NSClassFromString, NSColor, NSData, NSDeviceWhiteColorSpace, NSGraphicsContext, NSImage, NSImageColorSyncProfileData, NSImageInterpolationNone, NSMakeRect, NSPNGFileType, NSPoint, NSRoundLineCapStyle, NSTIFFFileType
 
 
 plugin_id = "de.kutilek.scrawl"
 default_pen_size = 2
-default_pixel_size = 4
+default_pixel_size = 2
 
 
 def initImage(layer, pixel_size=default_pixel_size):
@@ -67,16 +67,15 @@ def getScrawl(layer):
 
 	data = layer.userData["%s.data" % plugin_id]
 	if data is None:
-		data = initImage(layer, default_pixel_size)
+		img = initImage(layer, default_pixel_size)
 	else:
 		try:
-			# FIXME: The loaded image rep is not in the same format as the blank image.
-			# It takes up twice the space as PNG. (RGB instead of grey?)
-			data = NSBitmapImageRep.alloc().initWithData_(data)
+			img = NSBitmapImageRep.alloc().initWithData_(data)
+			img.setProperty_withValue_(NSImageColorSyncProfileData, None)
 		except:
-			data = initImage(layer, default_pixel_size)
+			img = initImage(layer, default_pixel_size)
 
-	return pen_size, pixel_size, data
+	return pen_size, pixel_size, img
 
 
 def setScrawl(layer, pen_size, pixel_size, data=None):
@@ -87,6 +86,7 @@ def setScrawl(layer, pen_size, pixel_size, data=None):
 	else:
 		imgdata = data.representationUsingType_properties_(NSPNGFileType, None)
 		print("Saving PNG with %i bytes ..." % len(imgdata))
+		#imgdata.writeToFile_atomically_(join(dirname(__file__), "test.png"), False)
 		layer.userData["%s.data" % plugin_id] = imgdata
 
 
