@@ -4,7 +4,7 @@ from __future__ import division, print_function
 import objc
 from math import floor
 from os.path import dirname, join
-from GlyphsApp import GSOFFCURVE, GSQCURVE, GSCURVE
+from GlyphsApp import GSOFFCURVE, GSQCURVE, GSCURVE, UPDATEINTERFACE
 from GlyphsApp.plugins import *
 
 from AppKit import NSBezierPath, NSBitmapImageRep, NSClassFromString, NSColor, NSData, NSDeviceWhiteColorSpace, NSGraphicsContext, NSImage, NSImageColorSyncProfileData, NSImageInterpolationNone, NSMakeRect, NSPNGFileType, NSPoint, NSRoundLineCapStyle, NSTIFFFileType
@@ -160,6 +160,7 @@ class ScrawlTool(SelectTool):
 		self.mouse_position = None
 		self.layer = None
 		self.needs_save = False
+		self.current_layer = self.get_current_layer()
 
 	def start(self):
 		pass
@@ -178,7 +179,11 @@ class ScrawlTool(SelectTool):
 			self.w.pen_size.set(self.pen_size)
 			self.prev_location = None
 			self.needs_save = False
+			Glyphs.addCallback(self.update, UPDATEINTERFACE)
 			#deleteScrawl(layer)
+
+	def deactivate(self):
+		Glyphs.removeCallback(self.update)
 
 	def foreground(self, layer):
 		try:
@@ -317,14 +322,27 @@ class ScrawlTool(SelectTool):
 	def mouseUp_(self, event):
 		if self.setPixel(event):
 			if self.needs_save:
-				layer = self.get_current_layer()
-				if layer is not None:
-					setScrawl(layer, self.pen_size, self.pixel_size, self.data)
+				if self.current_layer is not None:
+					setScrawl(self.current_layer, self.pen_size, self.pixel_size, self.data)
+					self.needs_save = False
 				self.updateView()
 
 	def __file__(self):
 		"""Please leave this method unchanged"""
 		return __file__
+
+	def update(self, sender=None):
+		cl = self.get_current_layer()
+		if cl != self.current_layer:
+			if self.needs_save:
+				if self.current_layer is not None:
+					setScrawl(self.current_layer, self.pen_size, self.pixel_size, self.data)
+			self.current_layer = cl
+			self.pen_size, self.pixel_size, self.data = getScrawl(self.current_layer)
+			self.w.pen_size.set(self.pen_size)
+			self.prev_location = None
+			self.needs_save = False
+		self.updateView()
 
 	def updateView(self):
 		currentTabView = Glyphs.font.currentTab
