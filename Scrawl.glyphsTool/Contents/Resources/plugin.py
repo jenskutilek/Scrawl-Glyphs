@@ -56,67 +56,6 @@ def initImage(layer, pixel_size=default_pixel_size):
 	return img
 
 
-def getScrawl(layer):
-	pen_size = layer.userData["%s.size" % plugin_id]
-	if pen_size is None:
-		pen_size = default_pen_size # scrawl pixels
-
-	pixel_size = layer.userData["%s.unit" % plugin_id]
-	if pixel_size is None:
-		pixel_size = default_pixel_size # font units
-
-	data = layer.userData["%s.data" % plugin_id]
-	if data is None:
-		img = initImage(layer, default_pixel_size)
-	else:
-		try:
-			img = NSBitmapImageRep.alloc().initWithData_(data)
-			img.setProperty_withValue_(NSImageColorSyncProfileData, None)
-		except:
-			img = initImage(layer, default_pixel_size)
-
-	return pen_size, pixel_size, img
-
-
-def setScrawl(layer, pen_size, pixel_size, data=None):
-	layer.userData["%s.size" % plugin_id] = int(round(pen_size))
-	layer.userData["%s.unit" % plugin_id] = int(round(pixel_size))
-	if data is None:
-		del layer.userData["%s.data" % plugin_id]
-	else:
-		imgdata = data.representationUsingType_properties_(NSPNGFileType, None)
-		print("Saving PNG with %i bytes ..." % len(imgdata))
-		#imgdata.writeToFile_atomically_(join(dirname(__file__), "test.png"), False)
-		layer.userData["%s.data" % plugin_id] = imgdata
-
-
-def deleteScrawl(layer):
-	for key in ("unit", "data", "size"):
-		full_key = "%s.%s" % (plugin_id, key)
-		if layer.userData[full_key] is not None:
-			del layer.userData[full_key]
-
-
-def saveScrawlToBackground(layer):
-	data = layer.userData["%s.data" % plugin_id]
-	font = layer.parent.parent
-	try:
-		master = font.masters[layer.layerId]
-	except KeyError:
-		return
-	if master is None:
-		return
-	pad = int(round(font.upm / 10))
-	if data is not None:
-		try:
-			data = NSImage.alloc().initWithData_(data)
-		except:
-			return
-		#layer.backgroundImage = GSBackgroundImage('/path/to/file.jpg')
-		#layer.backgroundImage.position = NSPoint(-pad, master.descender - pad)
-		#layer.backgroundImage.scale = (2 * pad + font.upm) / layer.backgroundImage.size().height
-
-
 
 
 class ScrawlTool(SelectTool):
@@ -173,14 +112,12 @@ class ScrawlTool(SelectTool):
 		return editView.activeLayer()
 
 	def activate(self):
-		if Glyphs.font.selectedLayers:
-			layer = Glyphs.font.selectedLayers[0]
-			self.pen_size, self.pixel_size, self.data = getScrawl(layer)
+		self.current_layer = self.get_current_layer()
+		if self.current_layer is not None:
+			self.loadScrawl()
 			self.w.pen_size.set(self.pen_size)
 			self.prev_location = None
-			self.needs_save = False
-			Glyphs.addCallback(self.update, UPDATEINTERFACE)
-			#deleteScrawl(layer)
+		Glyphs.addCallback(self.update, UPDATEINTERFACE)
 
 	def deactivate(self):
 		Glyphs.removeCallback(self.update)
@@ -210,7 +147,6 @@ class ScrawlTool(SelectTool):
 			else:
 				NSColor.lightGrayColor().set()
 			path.stroke()
-
 
 	def background(self, layer):
 		self.layer = layer
@@ -322,9 +258,7 @@ class ScrawlTool(SelectTool):
 	def mouseUp_(self, event):
 		if self.setPixel(event):
 			if self.needs_save:
-				if self.current_layer is not None:
-					setScrawl(self.current_layer, self.pen_size, self.pixel_size, self.data)
-					self.needs_save = False
+				self.saveScrawl()
 				self.updateView()
 
 	def __file__(self):
@@ -335,13 +269,11 @@ class ScrawlTool(SelectTool):
 		cl = self.get_current_layer()
 		if cl != self.current_layer:
 			if self.needs_save:
-				if self.current_layer is not None:
-					setScrawl(self.current_layer, self.pen_size, self.pixel_size, self.data)
+				self.saveScrawl()
 			self.current_layer = cl
-			self.pen_size, self.pixel_size, self.data = getScrawl(self.current_layer)
+			self.loadScrawl()
 			self.w.pen_size.set(self.pen_size)
 			self.prev_location = None
-			self.needs_save = False
 		self.updateView()
 
 	def updateView(self):
@@ -362,3 +294,71 @@ class ScrawlTool(SelectTool):
 		if sender is not None:
 			self.pen_size = int("%i" % sender.get())
 			self.updateView()
+
+	def loadScrawl(self):
+		if self.current_layer is None:
+			return
+
+		self.pen_size = self.current_layer.userData["%s.size" % plugin_id]
+		if self.pen_size is None:
+			self.pen_size = default_pen_size # scrawl pixels
+
+		self.pixel_size = self.current_layer.userData["%s.unit" % plugin_id]
+		if self.pixel_size is None:
+			self.pixel_size = default_pixel_size # font units
+
+		data = self.current_layer.userData["%s.data" % plugin_id]
+		if data is None:
+			self.data = initImage(self.current_layer, default_pixel_size)
+		else:
+			try:
+				self.data = NSBitmapImageRep.alloc().initWithData_(data)
+				self.data.setProperty_withValue_(NSImageColorSyncProfileData, None)
+			except:
+				self.data = initImage(self.current_layer, default_pixel_size)
+		self.needs_save = False
+
+	def saveScrawl(self):
+		if self.current_layer is None:
+			return
+		self.current_layer.userData["%s.size" % plugin_id] = int(round(self.pen_size))
+		self.current_layer.userData["%s.unit" % plugin_id] = int(round(self.pixel_size))
+		if self.data is None:
+			del self.current_layer.userData["%s.data" % plugin_id]
+		else:
+			imgdata = self.data.representationUsingType_properties_(NSPNGFileType, None)
+			print("Saving PNG with %i bytes ..." % len(imgdata))
+			if len(imgdata) > 2**16:
+				print("Glyphs Bug: Image is too big to save")
+				#imgdata.writeToFile_atomically_(join(dirname(__file__), "test.png"), False)
+			else:
+				self.current_layer.userData["%s.data" % plugin_id] = imgdata
+		self.needs_save = False
+
+	def deleteScrawl(self):
+		if self.current_layer is None:
+			return
+		for key in ("unit", "data", "size"):
+			full_key = "%s.%s" % (plugin_id, key)
+			if self.current_layer.userData[full_key] is not None:
+				del self.current_layer.userData[full_key]
+		self.needs_save = False
+
+	def saveScrawlToBackground(self):
+		self.data = self.current_layer.userData["%s.data" % plugin_id]
+		font = self.current_layer.parent.parent
+		try:
+			master = font.masters[self.current_layer.layerId]
+		except KeyError:
+			return
+		if master is None:
+			return
+		pad = int(round(font.upm / 10))
+		if self.data is not None:
+			try:
+				data = NSImage.alloc().initWithData_(self.data)
+			except:
+				return
+			#self.current_layer.backgroundImage = GSBackgroundImage('/path/to/file.jpg')
+			#self.current_layer.backgroundImage.position = NSPoint(-pad, master.descender - pad)
+			#self.current_layer.backgroundImage.scale = (2 * pad + font.upm) / self.current_layer.backgroundImage.size().height
