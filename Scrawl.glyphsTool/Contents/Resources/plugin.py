@@ -283,7 +283,7 @@ class ScrawlTool(SelectTool):
 
 	def delete_data(self, sender=None):
 		for layer in Glyphs.font.selectedLayers:
-			deleteScrawl(layer)
+			self.deleteScrawl()
 		self.updateView()
 
 	def save_background(self, sender=None):
