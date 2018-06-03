@@ -7,7 +7,7 @@ from os.path import dirname, join
 from GlyphsApp import GSOFFCURVE, GSQCURVE, GSCURVE, UPDATEINTERFACE
 from GlyphsApp.plugins import *
 
-from AppKit import NSBezierPath, NSBitmapImageRep, NSClassFromString, NSColor, NSData, NSDeviceWhiteColorSpace, NSGraphicsContext, NSImage, NSImageColorSyncProfileData, NSImageInterpolationNone, NSMakeRect, NSPNGFileType, NSPoint, NSRoundLineCapStyle, NSTIFFFileType
+from AppKit import NSBezierPath, NSBitmapImageRep, NSClassFromString, NSColor, NSData, NSDeviceWhiteColorSpace, NSDeviceRGBColorSpace, NSGraphicsContext, NSImage, NSImageColorSyncProfileData, NSImageInterpolationNone, NSMakeRect, NSPNGFileType, NSPoint, NSRoundLineCapStyle, NSTIFFFileType
 
 
 plugin_id = "de.kutilek.scrawl"
@@ -30,6 +30,7 @@ def initImage(layer, pixel_size=default_pixel_size):
 		False,  # hasAlpha
 		False,  # isPlanar
 		NSDeviceWhiteColorSpace,  # colorSpaceName
+		#NSDeviceRGBColorSpace,
 		0,      # bitmapFormat
 		0,      # bytesPerRow
 		0,      # bitsPerPixel
