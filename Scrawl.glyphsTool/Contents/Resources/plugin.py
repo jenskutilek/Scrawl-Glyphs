@@ -273,7 +273,7 @@ class ScrawlTool(SelectTool):
 
     def delete_data(self, sender=None):
         for layer in Glyphs.font.selectedLayers:
-            self.deleteScrawl()
+            self.deleteScrawl(layer)
         self.updateView()
 
     def save_background(self, sender=None):
@@ -371,13 +371,13 @@ class ScrawlTool(SelectTool):
             self.current_layer.userData["%s.data" % plugin_id] = imgdata
         self.needs_save = False
 
-    def deleteScrawl(self):
-        if self.current_layer is None:
+    def deleteScrawl(self, layer):
+        if layer is None:
             return
         for key in ("data", "unit", "rect", "size"):
             full_key = "%s.%s" % (plugin_id, key)
-            if self.current_layer.userData[full_key] is not None:
-                del self.current_layer.userData[full_key]
+            if layer.userData[full_key] is not None:
+                del layer.userData[full_key]
         self.needs_save = False
 
     def saveScrawlToBackground(self, layer):
