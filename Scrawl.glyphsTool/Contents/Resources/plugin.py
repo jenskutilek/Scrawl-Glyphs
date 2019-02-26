@@ -378,21 +378,28 @@ class ScrawlTool(SelectTool):
                 del self.current_layer.userData[full_key]
         self.needs_save = False
 
-    def saveScrawlToBackground(self):
-        self.data = self.current_layer.userData["%s.data" % plugin_id]
-        font = self.current_layer.parent.parent
-        try:
-            master = font.masters[self.current_layer.layerId]
-        except KeyError:
-            return
-        if master is None:
-            return
-        pad = int(round(font.upm / 10))
-        if self.data is not None:
+    def saveScrawlToBackground(self, layer):
+        font = layer.parent.parent
+        if font.filepath is None:
+            print("You must save the Glyphs file before a Scrawl background image can be added.")
+        data = layer.userData["%s.data" % plugin_id]
+        pixel_size = layer.userData["%s.unit" % plugin_id]
+        rect = NSMakeRect(*layer.userData["%s.rect" % plugin_id])
+        if data is not None:
+            image_path = join(dirname(font.filepath), "%s-%s.png" % (
+                layer.layerId,
+                layer.parent.name
+            ))
             try:
-                data = NSImage.alloc().initWithData_(self.data)
+                imgdata = NSBitmapImageRep.alloc().initWithData_(data)
             except:
+                print("Error saving the image file.")
                 return
-            #self.current_layer.backgroundImage = GSBackgroundImage('/path/to/file.jpg')
-            #self.current_layer.backgroundImage.position = NSPoint(-pad, master.descender - pad)
-            #self.current_layer.backgroundImage.scale = (2 * pad + font.upm) / self.current_layer.backgroundImage.size().height
+            pngdata = imgdata.representationUsingType_properties_(NSPNGFileType, None)
+            pngdata.writeToFile_atomically_(image_path, False)
+            layer.backgroundImage = GSBackgroundImage(image_path)
+            layer.backgroundImage.position = NSPoint(
+                rect.origin.x,
+                rect.origin.y
+            )
+            layer.backgroundImage.scale = (rect.size.width / pixel_size)
