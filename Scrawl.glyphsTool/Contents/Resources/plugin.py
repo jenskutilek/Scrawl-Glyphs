@@ -362,10 +362,10 @@ class ScrawlTool(SelectTool):
                 self.rect.size.height
             )
             imgdata = self.data.representationUsingType_properties_(NSPNGFileType, None)
-            print("Saving PNG with %i bytes ..." % len(imgdata))
-            if len(imgdata) > 2**16:
-                print("Glyphs Bug: Image is too big to save")
-                # imgdata.writeToFile_atomically_(join(dirname(__file__), "test.png"), False)
+            # print("Saving PNG with %i bytes ..." % len(imgdata))
+            # if len(imgdata) > 2**16:
+            #     print("Glyphs Bug: Image is too big to save")
+            #     # imgdata.writeToFile_atomically_(join(dirname(__file__), "test.png"), False)
             self.current_layer.userData["%s.data" % plugin_id] = imgdata
         self.needs_save = False
 
