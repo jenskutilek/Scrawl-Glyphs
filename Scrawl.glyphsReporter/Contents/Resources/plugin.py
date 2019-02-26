@@ -12,47 +12,45 @@ from AppKit import NSClassFromString, NSGraphicsContext, NSImage, NSImageInterpo
 plugin_id = "de.kutilek.scrawl"
 
 
-
-
 class ScrawlReporter(ReporterPlugin):
 
-	def settings(self):
-		self.menuName = Glyphs.localize({'en': u'Scrawl'})
-		
-	def background(self, layer):
+    def settings(self):
+        self.menuName = Glyphs.localize({'en': u'Scrawl'})
 
-		# Check if the drawing should be shown
+    def background(self, layer):
 
-		currentController = self.controller.view().window().windowController()
-		if currentController:
-			tool = currentController.toolDrawDelegate()
-			if tool.isKindOfClass_(NSClassFromString("GlyphsToolText")) \
-				or tool.isKindOfClass_(NSClassFromString("GlyphsToolHand")) \
-				or tool.isKindOfClass_(NSClassFromString("ScrawlTool")):
-				return
-		
-		# find master for image positioning (descender)
-		
-		try:
-			master = layer.parent.parent.masters[layer.layerId]
-		except KeyError:
-			return
-		if master is None:
-			return
-		
-		# draw pixels
+        # Check if the drawing should be shown
 
-		data = layer.userData["%s.data" % plugin_id]
-		if data is None:
-			return
-		try:
-			data = NSImage.alloc().initWithData_(data)
-		except:
-			return
-		font = layer.parent.parent
-		pad = int(round(font.upm / 10))
-		rect = NSMakeRect(-pad, master.descender - pad, 2 * pad + layer.width, 2 * pad + font.upm)
-		NSGraphicsContext.saveGraphicsState()
-		NSGraphicsContext.currentContext().setImageInterpolation_(NSImageInterpolationNone)
-		data.drawInRect_(rect)
-		NSGraphicsContext.restoreGraphicsState()
+        currentController = self.controller.view().window().windowController()
+        if currentController:
+            tool = currentController.toolDrawDelegate()
+            if tool.isKindOfClass_(NSClassFromString("GlyphsToolText")) \
+                    or tool.isKindOfClass_(NSClassFromString("GlyphsToolHand")) \
+                    or tool.isKindOfClass_(NSClassFromString("ScrawlTool")):
+                return
+
+        # find master for image positioning (descender)
+
+        try:
+            master = layer.parent.parent.masters[layer.layerId]
+        except KeyError:
+            return
+        if master is None:
+            return
+
+        # draw pixels
+
+        data = layer.userData["%s.data" % plugin_id]
+        if data is None:
+            return
+        try:
+            data = NSImage.alloc().initWithData_(data)
+        except:
+            return
+        font = layer.parent.parent
+        pad = int(round(font.upm / 10))
+        rect = NSMakeRect(-pad, master.descender - pad, 2 * pad + layer.width, 2 * pad + font.upm)
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.currentContext().setImageInterpolation_(NSImageInterpolationNone)
+        data.drawInRect_(rect)
+        NSGraphicsContext.restoreGraphicsState()
