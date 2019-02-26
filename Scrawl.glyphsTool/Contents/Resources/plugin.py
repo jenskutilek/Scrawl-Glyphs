@@ -18,18 +18,18 @@ default_pixel_size = 2
 def initImage(layer, width, height, pixel_size=default_pixel_size):
     # See https://developer.apple.com/documentation/appkit/nsbitmapimagerep/1395538-init
     img = NSBitmapImageRep.alloc().initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bitmapFormat_bytesPerRow_bitsPerPixel_(
-        None,   # BitmapDataPlanes
-        width,  # pixelsWide
-        height, # pixelsHigh
-        8,      # bitsPerSample: 1, 2, 4, 8, 12, or 16
-        1,      # samplesPerPixel: 1 - 5
-        False,  # hasAlpha
-        False,  # isPlanar
+        None,    # BitmapDataPlanes
+        int(round(width / pixel_size)),   # pixelsWide
+        int(round(height / pixel_size)),  # pixelsHigh
+        8,       # bitsPerSample: 1, 2, 4, 8, 12, or 16
+        1,       # samplesPerPixel: 1 - 5
+        False,   # hasAlpha
+        False,   # isPlanar
         NSDeviceWhiteColorSpace,  # colorSpaceName
         # NSDeviceRGBColorSpace,
-        0,      # bitmapFormat
-        0,      # bytesPerRow
-        0,      # bitsPerPixel
+        0,       # bitmapFormat
+        0,       # bytesPerRow
+        0,       # bitsPerPixel
     )
     """
         NSCalibratedWhiteColorSpace
@@ -47,7 +47,7 @@ def initImage(layer, width, height, pixel_size=default_pixel_size):
     context = NSGraphicsContext.graphicsContextWithBitmapImageRep_(img)
     NSGraphicsContext.setCurrentContext_(context)
     NSColor.whiteColor().set()
-    NSBezierPath.setLineWidth_(1)
+    # NSBezierPath.setLineWidth_(1)
     NSBezierPath.fillRect_(NSMakeRect(0, 0, width, height))
     NSGraphicsContext.setCurrentContext_(current)
     return img
@@ -184,8 +184,8 @@ class ScrawlTool(SelectTool):
 
         Loc = editView.getActiveLocation_(event)
         loc_pixel = (
-            (Loc.x + self.rect.origin.x) / self.pixel_size,
-            (Loc.y + self.rect.origin.y) / self.pixel_size
+            (Loc.x - self.rect.origin.x) / self.pixel_size,
+            (Loc.y - self.rect.origin.y) / self.pixel_size
         )
         if self.prev_location is None or self.prev_location != loc_pixel:
             x, y = loc_pixel
@@ -302,7 +302,6 @@ class ScrawlTool(SelectTool):
         )
 
     def loadScrawl(self):
-        print("loadScrawl")
         if self.current_layer is None:
             return
 
@@ -324,7 +323,12 @@ class ScrawlTool(SelectTool):
         # Image data
         data = self.current_layer.userData["%s.data" % plugin_id]
         if data is None:
-            self.data = initImage(self.current_layer, self.rect.size.width, self.rect.size.height, self.pixel_size)
+            self.data = initImage(
+                self.current_layer,
+                self.rect.size.width,
+                self.rect.size.height,
+                self.pixel_size
+            )
         else:
             try:
                 self.data = NSBitmapImageRep.alloc().initWithData_(data)
@@ -334,7 +338,12 @@ class ScrawlTool(SelectTool):
                 )
             except:
                 print("Error in image data of layer %s" % self.current_layer)
-                self.data = initImage(self.current_layer, self.rect.size.width, self.rect.size.height, self.pixel_size)
+                self.data = initImage(
+                    self.current_layer,
+                    self.rect.size.width,
+                    self.rect.size.height,
+                    self.pixel_size
+                )
         self.needs_save = False
 
     def saveScrawl(self):
@@ -357,8 +366,7 @@ class ScrawlTool(SelectTool):
             if len(imgdata) > 2**16:
                 print("Glyphs Bug: Image is too big to save")
                 # imgdata.writeToFile_atomically_(join(dirname(__file__), "test.png"), False)
-            else:
-                self.current_layer.userData["%s.data" % plugin_id] = imgdata
+            self.current_layer.userData["%s.data" % plugin_id] = imgdata
         self.needs_save = False
 
     def deleteScrawl(self):
