@@ -15,22 +15,18 @@ default_pen_size = 2
 default_pixel_size = 2
 
 
-def initImage(layer, pixel_size=default_pixel_size):
-    upm = layer.parent.parent.upm
-    pad = int(round(upm / 10))
-    w = int(round((2 * pad + layer.width) / pixel_size))
-    h = int(round((2 * pad + upm) / pixel_size))
+def initImage(layer, width, height, pixel_size=default_pixel_size):
     # See https://developer.apple.com/documentation/appkit/nsbitmapimagerep/1395538-init
     img = NSBitmapImageRep.alloc().initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bitmapFormat_bytesPerRow_bitsPerPixel_(
         None,   # BitmapDataPlanes
-        w,      # pixelsWide
-        h,      # pixelsHigh
+        width,  # pixelsWide
+        height, # pixelsHigh
         8,      # bitsPerSample: 1, 2, 4, 8, 12, or 16
         1,      # samplesPerPixel: 1 - 5
         False,  # hasAlpha
         False,  # isPlanar
         NSDeviceWhiteColorSpace,  # colorSpaceName
-        #NSDeviceRGBColorSpace,
+        # NSDeviceRGBColorSpace,
         0,      # bitmapFormat
         0,      # bytesPerRow
         0,      # bitsPerPixel
@@ -51,8 +47,8 @@ def initImage(layer, pixel_size=default_pixel_size):
     context = NSGraphicsContext.graphicsContextWithBitmapImageRep_(img)
     NSGraphicsContext.setCurrentContext_(context)
     NSColor.whiteColor().set()
-    #NSBezierPath.setLineWidth_(1)
-    NSBezierPath.fillRect_(NSMakeRect(0, 0, w, h))
+    NSBezierPath.setLineWidth_(1)
+    NSBezierPath.fillRect_(NSMakeRect(0, 0, width, height))
     NSGraphicsContext.setCurrentContext_(current)
     return img
 
@@ -60,9 +56,9 @@ def initImage(layer, pixel_size=default_pixel_size):
 class ScrawlTool(SelectTool):
 
     def settings(self):
-        from vanilla import ComboBox, Group, Slider, TextBox, Window 
+        from vanilla import Group, Slider, TextBox, Window
         self.name = 'Scrawl'
-        self.slider_value = 1 # current slider value
+        self.slider_value = 1  # current slider value
 
         # Create Vanilla window and group with controls
         viewWidth = 180
@@ -93,6 +89,7 @@ class ScrawlTool(SelectTool):
         self.keyboardShortcut = 'c'
         self.pen_size = default_pen_size
         self.pixel_size = default_pixel_size
+        self.rect = NSMakeRect(0, 0, 1000, 1000)
         self.data = None
         self.prev_location = None
         self.erase = False
@@ -131,6 +128,7 @@ class ScrawlTool(SelectTool):
             return
 
         if self.mouse_position is not None:
+            # Draw a preview circle at the mouse position
             x, y = self.mouse_position
             scaled_pen = self.pen_size * self.pixel_size
             half = scaled_pen / 2
@@ -153,23 +151,9 @@ class ScrawlTool(SelectTool):
         # draw pixels
         if self.data is None:
             return
-        font = layer.parent.parent
-        pad = int(round(font.upm / 10))
-        try:
-            master = layer.parent.parent.masters[layer.layerId]
-        except KeyError:
-            return
-        if master is None:
-            return
-        rect = NSMakeRect(
-            -pad,
-            master.descender - pad,
-            2 * pad + layer.width,
-            2 * pad + font.upm
-        )
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.currentContext().setImageInterpolation_(NSImageInterpolationNone)
-        self.data.drawInRect_(rect)
+        self.data.drawInRect_(self.rect)
         NSGraphicsContext.restoreGraphicsState()
 
     def keyDown_(self, event):
@@ -199,10 +183,9 @@ class ScrawlTool(SelectTool):
             return False
 
         Loc = editView.getActiveLocation_(event)
-        pad = int(round(layer.parent.parent.upm / 10))
         loc_pixel = (
-            (Loc.x + pad) / self.pixel_size,
-            (Loc.y + pad - master.descender) / self.pixel_size
+            (Loc.x + self.rect.origin.x) / self.pixel_size,
+            (Loc.y + self.rect.origin.y) / self.pixel_size
         )
         if self.prev_location is None or self.prev_location != loc_pixel:
             x, y = loc_pixel
@@ -300,21 +283,48 @@ class ScrawlTool(SelectTool):
             self.pen_size = int("%i" % sender.get())
             self.updateView()
 
+    def loadDefaultRect(self):
+        # Make the default drawing rect based on master and layer dimensions
+        font = self.current_layer.parent.parent
+        upm = font.upm
+        pad = int(round(upm / 10))
+
+        try:
+            descender = font.masters[self.current_layer.layerId].descender
+        except KeyError:
+            descender = int(round(-upm / 5))
+
+        self.rect = NSMakeRect(
+            -pad,
+            descender - pad,
+            2 * pad + self.current_layer.width,
+            2 * pad + upm
+        )
+
     def loadScrawl(self):
+        print("loadScrawl")
         if self.current_layer is None:
             return
 
         self.pen_size = self.current_layer.userData["%s.size" % plugin_id]
         if self.pen_size is None:
-            self.pen_size = default_pen_size # scrawl pixels
+            self.pen_size = default_pen_size  # scrawl pixels
 
         self.pixel_size = self.current_layer.userData["%s.unit" % plugin_id]
         if self.pixel_size is None:
-            self.pixel_size = default_pixel_size # font units
+            self.pixel_size = default_pixel_size  # font units
 
+        # Drawing rect
+        rect = self.current_layer.userData["%s.rect" % plugin_id]
+        if rect is None:
+            self.loadDefaultRect()
+        else:
+            self.rect = NSMakeRect(*rect)
+
+        # Image data
         data = self.current_layer.userData["%s.data" % plugin_id]
         if data is None:
-            self.data = initImage(self.current_layer, default_pixel_size)
+            self.data = initImage(self.current_layer, self.rect.size.width, self.rect.size.height, self.pixel_size)
         else:
             try:
                 self.data = NSBitmapImageRep.alloc().initWithData_(data)
@@ -323,7 +333,8 @@ class ScrawlTool(SelectTool):
                     None
                 )
             except:
-                self.data = initImage(self.current_layer, default_pixel_size)
+                print("Error in image data of layer %s" % self.current_layer)
+                self.data = initImage(self.current_layer, self.rect.size.width, self.rect.size.height, self.pixel_size)
         self.needs_save = False
 
     def saveScrawl(self):
@@ -333,7 +344,14 @@ class ScrawlTool(SelectTool):
         self.current_layer.userData["%s.unit" % plugin_id] = int(round(self.pixel_size))
         if self.data is None:
             del self.current_layer.userData["%s.data" % plugin_id]
+            del self.current_layer.userData["%s.rect" % plugin_id]
         else:
+            self.current_layer.userData["%s.rect" % plugin_id] = (
+                self.rect.origin.x,
+                self.rect.origin.y,
+                self.rect.size.width,
+                self.rect.size.height
+            )
             imgdata = self.data.representationUsingType_properties_(NSPNGFileType, None)
             print("Saving PNG with %i bytes ..." % len(imgdata))
             if len(imgdata) > 2**16:
@@ -346,7 +364,7 @@ class ScrawlTool(SelectTool):
     def deleteScrawl(self):
         if self.current_layer is None:
             return
-        for key in ("unit", "data", "size"):
+        for key in ("data", "unit", "rect", "size"):
             full_key = "%s.%s" % (plugin_id, key)
             if self.current_layer.userData[full_key] is not None:
                 del self.current_layer.userData[full_key]

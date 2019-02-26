@@ -29,15 +29,6 @@ class ScrawlReporter(ReporterPlugin):
                     or tool.isKindOfClass_(NSClassFromString("ScrawlTool")):
                 return
 
-        # find master for image positioning (descender)
-
-        try:
-            master = layer.parent.parent.masters[layer.layerId]
-        except KeyError:
-            return
-        if master is None:
-            return
-
         # draw pixels
 
         data = layer.userData["%s.data" % plugin_id]
@@ -46,10 +37,32 @@ class ScrawlReporter(ReporterPlugin):
         try:
             data = NSImage.alloc().initWithData_(data)
         except:
+            print("Error in image data of layer %s" % layer)
             return
-        font = layer.parent.parent
-        pad = int(round(font.upm / 10))
-        rect = NSMakeRect(-pad, master.descender - pad, 2 * pad + layer.width, 2 * pad + font.upm)
+
+        rect = layer.userData["%s.rect" % plugin_id]
+        if rect is None:
+            # The drawing rect was not stored in user data.
+            # Deduce it from the layer/font metrics.
+            font = layer.parent.parent
+            pad = int(round(font.upm / 10))
+
+            # find master for image positioning (descender)
+
+            try:
+                descender = layer.parent.parent.masters[layer.layerId].descender
+            except KeyError:
+                descender = int(round(font.upm / 5))
+
+            rect = NSMakeRect(
+                -pad,
+                descender - pad,
+                2 * pad + layer.width,
+                2 * pad + font.upm
+            )
+        else:
+            # Use the rect from user data
+            rect = NSMakeRect(*rect)
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.currentContext().setImageInterpolation_(NSImageInterpolationNone)
         data.drawInRect_(rect)
