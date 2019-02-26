@@ -20,4 +20,5 @@ TypeCooker™-style drawing for Glyphs.app
 ## Bugs
 
 * The drawing indicator is not updated in real time, only when clicking.
-* Image size and position is fixed, e.g. when you change the sidebearings, the image will stay at its initial position.
+* Image size and position are fixed, e.g. when you change the sidebearings, the image will stay at its initial position.
+* Use a recent Glyphs version. Older versions had a bug when saving more than 64 kB in the user data lib. Complex drawings may reach that limit.
