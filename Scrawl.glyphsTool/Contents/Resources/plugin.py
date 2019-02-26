@@ -404,4 +404,4 @@ class ScrawlTool(SelectTool):
                 rect.origin.x,
                 rect.origin.y
             )
-            layer.backgroundImage.scale = (rect.size.width / pixel_size)
+            layer.backgroundImage.scale = float(pixel_size)
