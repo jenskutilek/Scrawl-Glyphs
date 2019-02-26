@@ -2,12 +2,14 @@
 from __future__ import division, print_function
 
 import objc
-from math import floor
 from os.path import dirname, join
-from GlyphsApp import GSOFFCURVE, GSQCURVE, GSCURVE, UPDATEINTERFACE
-from GlyphsApp.plugins import *
+from GlyphsApp import Glyphs, UPDATEINTERFACE
+from GlyphsApp.plugins import GSBackgroundImage, SelectTool
 
-from AppKit import NSBezierPath, NSBitmapImageRep, NSClassFromString, NSColor, NSData, NSDeviceWhiteColorSpace, NSDeviceRGBColorSpace, NSGraphicsContext, NSImage, NSImageColorSyncProfileData, NSImageInterpolationNone, NSMakeRect, NSPNGFileType, NSPoint, NSRoundLineCapStyle, NSTIFFFileType
+from AppKit import NSBezierPath, NSBitmapImageRep, NSColor, \
+    NSDeviceWhiteColorSpace, NSDeviceRGBColorSpace, NSGraphicsContext, \
+    NSImageColorSyncProfileData, NSImageInterpolationNone, NSMakeRect, \
+    NSPNGFileType, NSPoint, NSRoundLineCapStyle
 
 
 plugin_id = "de.kutilek.scrawl"
