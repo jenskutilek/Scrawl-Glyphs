@@ -458,13 +458,13 @@ unicode = 0065;
 },
 {
 glyphname = f;
-lastChange = "2019-02-26 11:39:38 +0000";
+lastChange = "2019-02-26 11:44:36 +0000";
 layers = (
 {
 backgroundImage = {
 crop = "{{0, 0}, {400, 600}}";
 imagePath = "A7B2DD4E-EBE2-496B-BF32-233D9F9759AE-f.png";
-transform = "{1, 0, 0, 1, -100, -300}";
+transform = "{2, 0, 0, 2, -100, -300}";
 };
 layerId = "A7B2DD4E-EBE2-496B-BF32-233D9F9759AE";
 userData = {
