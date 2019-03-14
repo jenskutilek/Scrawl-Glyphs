@@ -215,7 +215,7 @@ class ScrawlTool(SelectTool):
             (Loc.x - self.rect.origin.x) / self.pixel_size,
             (Loc.y - self.rect.origin.y) / self.pixel_size
         )
-        if self.prev_location is None or self.prev_location != loc_pixel:
+        if self.prev_location != loc_pixel:
             x, y = loc_pixel
             current = NSGraphicsContext.currentContext()
             context = NSGraphicsContext.graphicsContextWithBitmapImageRep_(self.data)
