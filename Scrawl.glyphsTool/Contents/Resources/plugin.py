@@ -155,13 +155,12 @@ class ScrawlTool(SelectTool):
         if self.mouse_position is not None:
             # Draw a preview circle at the mouse position
             x, y = self.mouse_position
-            scaled_pen = self.pen_size * self.pixel_size
-            half = scaled_pen / 2
+            half = self.pen_size / 2
             rect = NSMakeRect(
                 x - half,
                 y - half,
-                scaled_pen,
-                scaled_pen
+                self.pen_size,
+                self.pen_size
             )
             path = NSBezierPath.bezierPathWithOvalInRect_(rect)
             path.setLineWidth_(1)
@@ -230,23 +229,24 @@ class ScrawlTool(SelectTool):
                 NSColor.whiteColor().set()
             else:
                 NSColor.blackColor().set()
+            effective_size = self.pen_size / self.pixel_size
             if dragging and self.prev_location is not None:
                 px, py = self.prev_location
                 path = NSBezierPath.alloc().init()
-                NSBezierPath.setLineCapStyle_(NSRoundLineCapStyle)
-                NSBezierPath.setLineWidth_(self.pen_size)
+                path.setLineCapStyle_(NSRoundLineCapStyle)
+                path.setLineWidth_(effective_size)
                 # path.strokeLineFromPoint_toPoint_(x, y, x + self.pen_size, y + self.pen_size)
                 path.moveToPoint_((px, py))
                 path.lineToPoint_((x, y))
                 path.stroke()
                 self.needs_save = True
             else:
-                half = self.pen_size / 2
+                half = effective_size / 2
                 rect = NSMakeRect(
                     x - half,
                     y - half,
-                    self.pen_size,
-                    self.pen_size
+                    effective_size,
+                    effective_size
                 )
                 path = NSBezierPath.bezierPathWithOvalInRect_(rect)
                 path.fill()
