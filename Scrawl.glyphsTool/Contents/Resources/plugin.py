@@ -392,6 +392,7 @@ class ScrawlTool(SelectTool):
         font = layer.parent.parent
         if font.filepath is None:
             print("You must save the Glyphs file before a Scrawl background image can be added.")
+            return
         data = layer.userData["%s.data" % plugin_id]
         pixel_size = layer.userData["%s.unit" % plugin_id]
         rect = NSMakeRect(*layer.userData["%s.rect" % plugin_id])
