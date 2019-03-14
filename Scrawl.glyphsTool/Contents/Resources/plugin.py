@@ -181,8 +181,12 @@ class ScrawlTool(SelectTool):
         NSGraphicsContext.restoreGraphicsState()
 
     def keyDown_(self, event):
-        # Toggle between draw and eraser mode
-        if event.characters() == "e":
+        if event.characters() == "d":
+            # Delete the scrawl
+            # FIXME: Doesn't work
+            self.delete_data
+        elif event.characters() == "e":
+            # Toggle between draw and eraser mode
             self.erase = not(self.erase)
             self.prev_location = None
             self.updateView()
