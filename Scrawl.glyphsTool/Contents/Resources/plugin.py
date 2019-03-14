@@ -185,6 +185,7 @@ class ScrawlTool(SelectTool):
         # Toggle between draw and eraser mode
         if event.characters() == "e":
             self.erase = not(self.erase)
+            self.prev_location = None
             self.updateView()
         elif event.characters() in ("1", "2", "3", "4", "5", "6", "7", "8", "9"):
             self.pen_size = int(event.characters()) * self.pixel_size
