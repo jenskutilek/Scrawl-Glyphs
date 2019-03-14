@@ -85,9 +85,30 @@ class ScrawlTool(SelectTool):
         self.w.pen_size_text = TextBox((-50, y + 3, -20, 17), "%s" % default_pen_size)
 
         self.generalContextMenus = [
-            {"view": self.sliderMenuView.group.getNSView()},
-            {"name": Glyphs.localize({'en': u'Delete Scrawl', 'de': u'Gekritzel löschen'}), "action": self.delete_data},
-            {"name": Glyphs.localize({'en': u'Save Scrawl To Background Image', 'de': u'Gekritzel als Hintergrundbild speichern'}), "action": self.save_background},
+            {
+                "view": self.sliderMenuView.group.getNSView()
+            },
+            {
+                "name": Glyphs.localize({
+                    'en': u'Delete Scrawl',
+                    'de': u'Gekritzel löschen'
+                }),
+                "action": self.delete_data
+            },
+            {
+                "name": Glyphs.localize({
+                    'en': u'Save Scrawl To Background Image',
+                    'de': u'Gekritzel als Hintergrundbild speichern'
+                }),
+                "action": self.save_background
+            },
+            # {
+            #     "name": Glyphs.localize({
+            #         'en': u'Save current size as master default',
+            #         'de': u'Aktuelle Größe als Master-Standard speichern'
+            #     }),
+            #     "action": self.save_background
+            # },
         ]
         self.keyboardShortcut = 'c'
         self.pen_size = default_pen_size
