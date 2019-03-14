@@ -63,7 +63,7 @@ class ScrawlTool(SelectTool):
         self.slider_value = 1  # current slider value
 
         # Create Vanilla window and group with controls
-        viewWidth = 180
+        viewWidth = 266
         viewHeight = 42
         self.sliderMenuView = Window((viewWidth, viewHeight))
         self.sliderMenuView.group = Group((0, 0, viewWidth, viewHeight))
@@ -72,9 +72,9 @@ class ScrawlTool(SelectTool):
         self.w.text = TextBox((20, y, -20, 17), "%s Pen Size" % self.name)
         y += 18
         self.w.pen_size = Slider(
-            (20, y, -20, 24),
+            (20, y, -60, 24),
             minValue=1,
-            maxValue=100,
+            maxValue=256,
             value=float(self.slider_value),
             tickMarkCount=0,
             # stopOnTickMarks = False,
@@ -82,6 +82,7 @@ class ScrawlTool(SelectTool):
             callback=self.slider_callback,
             sizeStyle="small",
         )
+        self.w.pen_size_text = TextBox((-50, y + 3, -20, 17), "%s" % default_pen_size)
 
         self.generalContextMenus = [
             {"view": self.sliderMenuView.group.getNSView()},
@@ -115,6 +116,7 @@ class ScrawlTool(SelectTool):
         if self.current_layer is not None:
             self.loadScrawl()
             self.w.pen_size.set(self.pen_size)
+            self.w.pen_size_text.set(self.pen_size)
             self.prev_location = None
         Glyphs.addCallback(self.update, UPDATEINTERFACE)
 
@@ -165,6 +167,9 @@ class ScrawlTool(SelectTool):
             self.updateView()
         elif event.characters() in ("1", "2", "3", "4", "5", "6", "7", "8", "9"):
             self.pen_size = int(event.characters()) * self.pixel_size
+            self.w.pen_size.set(self.pen_size)
+            self.w.pen_size_text.set(self.pen_size)
+            self.updateView()
         else:
             objc.super(ScrawlTool, self).keyDown_(event)
 
@@ -263,6 +268,7 @@ class ScrawlTool(SelectTool):
             self.current_layer = cl
             self.loadScrawl()
             self.w.pen_size.set(self.pen_size)
+            self.w.pen_size_text.set(self.pen_size)
             self.prev_location = None
         self.updateView()
 
@@ -283,6 +289,8 @@ class ScrawlTool(SelectTool):
     def slider_callback(self, sender=None):
         if sender is not None:
             self.pen_size = int("%i" % sender.get())
+            self.w.pen_size_text.set(self.pen_size)
+            self.prev_location = None
             self.updateView()
 
     def loadDefaultRect(self):
