@@ -336,9 +336,10 @@ class ScrawlTool(SelectTool):
         if self.current_layer is None:
             return
 
-        self.pen_size = self.current_layer.userData["%s.size" % plugin_id]
-        if self.pen_size is None:
-            self.pen_size = default_pen_size  # scrawl pixels
+        pen_size = self.current_layer.userData["%s.size" % plugin_id]
+        if pen_size is not None:
+            self.pen_size = pen_size  # scrawl pixels
+            # Otherwise, keep the previous size
 
         self.pixel_size = self.current_layer.userData["%s.unit" % plugin_id]
         if self.pixel_size is None:
