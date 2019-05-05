@@ -51,7 +51,7 @@ def initImage(layer, width, height, pixel_size=default_pixel_size, ratio=1):
     NSGraphicsContext.setCurrentContext_(context)
     NSColor.whiteColor().set()
     # NSBezierPath.setLineWidth_(1)
-    NSBezierPath.fillRect_(NSMakeRect(0, 0, width, height))
+    NSBezierPath.fillRect_(NSMakeRect(0, 0, width, int(round(height / ratio))))
     NSGraphicsContext.setCurrentContext_(current)
     return img
 
