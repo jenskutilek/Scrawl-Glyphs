@@ -15,14 +15,15 @@ from AppKit import NSBezierPath, NSBitmapImageRep, NSColor, \
 plugin_id = "de.kutilek.scrawl"
 default_pen_size = 2
 default_pixel_size = 2
+default_pixel_ratio = 1
 
 
-def initImage(layer, width, height, pixel_size=default_pixel_size):
+def initImage(layer, width, height, pixel_size=default_pixel_size, ratio=1):
     # See https://developer.apple.com/documentation/appkit/nsbitmapimagerep/1395538-init
     img = NSBitmapImageRep.alloc().initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bitmapFormat_bytesPerRow_bitsPerPixel_(
         None,    # BitmapDataPlanes
         int(round(width / pixel_size)),   # pixelsWide
-        int(round(height / pixel_size)),  # pixelsHigh
+        int(round(height / pixel_size / ratio)),  # pixelsHigh
         8,       # bitsPerSample: 1, 2, 4, 8, 12, or 16
         1,       # samplesPerPixel: 1 - 5
         False,   # hasAlpha
@@ -50,7 +51,7 @@ def initImage(layer, width, height, pixel_size=default_pixel_size):
     NSGraphicsContext.setCurrentContext_(context)
     NSColor.whiteColor().set()
     # NSBezierPath.setLineWidth_(1)
-    NSBezierPath.fillRect_(NSMakeRect(0, 0, width, height))
+    NSBezierPath.fillRect_(NSMakeRect(0, 0, width, int(round(height / ratio))))
     NSGraphicsContext.setCurrentContext_(current)
     return img
 
@@ -113,6 +114,7 @@ class ScrawlTool(SelectTool):
         self.keyboardShortcut = 'c'
         self.pen_size = default_pen_size
         self.pixel_size = default_pixel_size
+        self.pixel_ratio = default_pixel_ratio
         self.rect = NSMakeRect(0, 0, 1000, 1000)
         self.data = None
         self.prev_location = None
@@ -155,12 +157,11 @@ class ScrawlTool(SelectTool):
         if self.mouse_position is not None:
             # Draw a preview circle at the mouse position
             x, y = self.mouse_position
-            half = self.pen_size / 2
             rect = NSMakeRect(
-                x - half,
-                y - half,
+                x - self.pen_size / 2,
+                y - self.pen_size * self.pixel_ratio / 2,
                 self.pen_size,
-                self.pen_size
+                self.pen_size * self.pixel_ratio
             )
             path = NSBezierPath.bezierPathWithOvalInRect_(rect)
             path.setLineWidth_(1)
@@ -214,10 +215,11 @@ class ScrawlTool(SelectTool):
         if master is None:
             return False
 
+        # Get location of click in font coordinates
         Loc = editView.getActiveLocation_(event)
         loc_pixel = (
             (Loc.x - self.rect.origin.x) / self.pixel_size,
-            (Loc.y - self.rect.origin.y) / self.pixel_size
+            (Loc.y - self.rect.origin.y) / self.pixel_size / self.pixel_ratio
         )
         if self.prev_location != loc_pixel:
             x, y = loc_pixel
@@ -350,6 +352,12 @@ class ScrawlTool(SelectTool):
         if self.pixel_size is None:
             self.pixel_size = default_pixel_size  # font units
 
+        self.pixel_ratio = self.current_layer.master.customParameters['ScrawlPenRatio']
+        if self.pixel_ratio is None:
+            self.pixel_ratio = default_pixel_ratio
+        else:
+            self.pixel_ratio = float(self.pixel_ratio)
+
         # Drawing rect
         rect = self.current_layer.userData["%s.rect" % plugin_id]
         if rect is None:
@@ -364,7 +372,8 @@ class ScrawlTool(SelectTool):
                 self.current_layer,
                 self.rect.size.width,
                 self.rect.size.height,
-                self.pixel_size
+                self.pixel_size,
+                self.pixel_ratio
             )
         else:
             try:
@@ -379,7 +388,8 @@ class ScrawlTool(SelectTool):
                     self.current_layer,
                     self.rect.size.width,
                     self.rect.size.height,
-                    self.pixel_size
+                    self.pixel_size,
+                    self.pixel_ratio
                 )
         self.needs_save = False
 
@@ -422,6 +432,11 @@ class ScrawlTool(SelectTool):
             return
         data = layer.userData["%s.data" % plugin_id]
         pixel_size = layer.userData["%s.unit" % plugin_id]
+        pixel_ratio = layer.master.customParameters['ScrawlPenRatio']
+        if pixel_ratio is None:
+            pixel_ratio = default_pixel_ratio
+        else:
+            pixel_ratio = float(pixel_ratio)
         rect = NSMakeRect(*layer.userData["%s.rect" % plugin_id])
         if data is not None:
             image_path = join(dirname(font.filepath), "%s-%s.png" % (
@@ -440,4 +455,4 @@ class ScrawlTool(SelectTool):
                 rect.origin.x,
                 rect.origin.y
             )
-            layer.backgroundImage.scale = float(pixel_size)
+            layer.backgroundImage.scale = (float(pixel_size), float(pixel_size * pixel_ratio))

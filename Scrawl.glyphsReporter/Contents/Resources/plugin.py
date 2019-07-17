@@ -6,7 +6,7 @@ from GlyphsApp import *
 from GlyphsApp.plugins import *
 
 
-from AppKit import NSClassFromString, NSGraphicsContext, NSImage, NSImageInterpolationNone, NSMakeRect
+from AppKit import NSClassFromString, NSCompositeSourceOver, NSGraphicsContext, NSImage, NSImageInterpolationNone, NSMakeRect, NSZeroRect
 
 
 plugin_id = "de.kutilek.scrawl"
@@ -65,5 +65,8 @@ class ScrawlReporter(ReporterPlugin):
             rect = NSMakeRect(*rect)
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.currentContext().setImageInterpolation_(NSImageInterpolationNone)
-        data.drawInRect_(rect)
+        if len(layer.paths) == 0:
+            data.drawInRect_(rect)
+        else:
+            data.drawInRect_fromRect_operation_fraction_(rect, NSZeroRect, NSCompositeSourceOver, 0.2)
         NSGraphicsContext.restoreGraphicsState()

@@ -17,17 +17,17 @@
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleVersion</key>
-	<string>3</string>
+	<string>5</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.3.0</string>
+	<string>0.4.1</string>
 	<key>UpdateFeedURL</key>
 	<string>https://raw.githubusercontent.com/jenskutilek/Scrawl-Glyphs/master/Scrawl.glyphsTool/Contents/Info.plist</string>
 	<key>productPageURL</key>
 	<string>https://github.com/jenskutilek/Scrawl-Glyphs/</string>
 	<key>productReleaseNotes</key>
-	<string>Initial release.</string>
+	<string>This update supports the master custom parameter ScrawlPenRatio to vary the vertical pen size relative to the horizontal size.</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright, Jens Kutilek, 2018</string>
+	<string>Copyright, Jens Kutilek, 2018–2019</string>
 	<key>NSPrincipalClass</key>
 	<string>ScrawlTool</string>
 	<key>PyMainFileNames</key>
