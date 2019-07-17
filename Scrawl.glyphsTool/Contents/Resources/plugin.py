@@ -327,7 +327,7 @@ class ScrawlTool(SelectTool):
 
         try:
             descender = font.masters[self.current_layer.layerId].descender
-        except KeyError:
+        except (AttributeError, KeyError):
             descender = int(round(-upm / 5))
 
         self.rect = NSMakeRect(
