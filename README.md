@@ -11,7 +11,7 @@ TypeCooker™-style drawing for Glyphs.app
 
 ## Installation
 
-* If you are running macOS Catalina, install Scrawl through Glyphs’ built-in plugin manager (Window > Plugin Manager) to avoid security warnings.
+* If you are running macOS Catalina, install Scrawl through Glyphs’ built-in plugin manager _(Window > Plugin Manager)_ to avoid security warnings.
 
 ## Tips
 
