@@ -4,6 +4,10 @@ TypeCooker™-style drawing for Glyphs.app
 
 <img src="data/ui.png" alt="">
 
+## Installation
+
+* If you are running macOS Catalina, install Scrawl through Glyphs’ built-in plugin manager to avoid security warnings.
+
 ## Features
 
 * No undo. Just Tipp-Ex®
