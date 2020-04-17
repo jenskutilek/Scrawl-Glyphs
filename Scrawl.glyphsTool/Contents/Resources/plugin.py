@@ -18,7 +18,6 @@ default_pixel_size = 2
 default_pixel_ratio = 1
 
 
-@objc.python_method
 def initImage(layer, width, height, pixel_size=default_pixel_size, ratio=1):
     # See https://developer.apple.com/documentation/appkit/nsbitmapimagerep/1395538-init
     img = NSBitmapImageRep.alloc().initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bitmapFormat_bytesPerRow_bitsPerPixel_(
@@ -82,7 +81,7 @@ class ScrawlTool(SelectTool):
             tickMarkCount=0,
             # stopOnTickMarks = False,
             # continuuous = True,
-            callback=self.slider_callback,
+            callback=self.sliderCallback_,
             sizeStyle="small",
         )
         self.w.pen_size_text = TextBox(
@@ -96,24 +95,24 @@ class ScrawlTool(SelectTool):
             },
             {
                 "name": Glyphs.localize({
-                    'en': u'Delete Scrawl',
-                    'de': u'Gekritzel löschen'
+                    'en': 'Delete Scrawl',
+                    'de': 'Gekritzel löschen'
                 }),
-                "action": self.delete_data
+                "action": self.deleteData
             },
             {
                 "name": Glyphs.localize({
-                    'en': u'Save Scrawl To Background Image',
-                    'de': u'Gekritzel als Hintergrundbild speichern'
+                    'en': 'Save Scrawl To Background Image',
+                    'de': 'Gekritzel als Hintergrundbild speichern'
                 }),
-                "action": self.save_background
+                "action": self.saveBackground
             },
             # {
             #     "name": Glyphs.localize({
-            #         'en': u'Save current size as master default',
-            #         'de': u'Aktuelle Größe als Master-Standard speichern'
+            #         'en': 'Save current size as master default',
+            #         'de': 'Aktuelle Größe als Master-Standard speichern'
             #     }),
-            #     "action": self.save_background
+            #     "action": self.saveBackground
             # },
         ]
         self.keyboardShortcut = 'c'
@@ -329,19 +328,16 @@ class ScrawlTool(SelectTool):
         if currentTabView:
             currentTabView.graphicView().setNeedsDisplay_(True)
 
-    @objc.python_method
-    def delete_data(self, sender=None):
+    def deleteData(self):
         for layer in Glyphs.font.selectedLayers:
             self.deleteScrawl(layer)
         self.updateView()
 
-    @objc.python_method
-    def save_background(self, sender=None):
+    def saveBackground(self):
         for layer in Glyphs.font.selectedLayers:
             self.saveScrawlToBackground(layer)
 
-    @objc.python_method
-    def slider_callback(self, sender=None):
+    def sliderCallback_(self, sender=None):
         if sender is not None:
             self.pen_size = int("%i" % sender.get())
             self.w.pen_size_text.set(self.pen_size)
