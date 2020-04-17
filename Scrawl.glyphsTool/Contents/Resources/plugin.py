@@ -18,6 +18,7 @@ default_pixel_size = 2
 default_pixel_ratio = 1
 
 
+@objc.python_method
 def initImage(layer, width, height, pixel_size=default_pixel_size, ratio=1):
     # See https://developer.apple.com/documentation/appkit/nsbitmapimagerep/1395538-init
     img = NSBitmapImageRep.alloc().initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bitmapFormat_bytesPerRow_bitsPerPixel_(
@@ -323,7 +324,6 @@ class ScrawlTool(SelectTool):
             self.prev_location = None
         self.updateView()
 
-    @objc.python_method
     def updateView(self):
         currentTabView = Glyphs.font.currentTab
         if currentTabView:
@@ -348,7 +348,6 @@ class ScrawlTool(SelectTool):
             self.prev_location = None
             self.updateView()
 
-    @objc.python_method
     def loadDefaultRect(self):
         # Make the default drawing rect based on master and layer dimensions
         font = self.current_layer.parent.parent
@@ -367,7 +366,6 @@ class ScrawlTool(SelectTool):
             2 * pad + upm
         )
 
-    @objc.python_method
     def loadScrawl(self):
         if self.current_layer is None:
             return
@@ -424,7 +422,6 @@ class ScrawlTool(SelectTool):
                 )
         self.needs_save = False
 
-    @objc.python_method
     def saveScrawl(self):
         if self.current_layer is None:
             return
