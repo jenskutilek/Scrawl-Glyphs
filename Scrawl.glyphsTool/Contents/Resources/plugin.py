@@ -3,7 +3,7 @@ from __future__ import division, print_function, unicode_literals
 
 import objc
 from os.path import dirname, join
-from GlyphsApp import Glyphs, GSBackgroundImage, UPDATEINTERFACE
+from GlyphsApp import Glyphs, GSBackgroundImage, MOUSEMOVED, UPDATEINTERFACE
 from GlyphsApp.plugins import SelectTool
 
 from AppKit import NSBezierPath, NSBitmapImageRep, NSColor, \
@@ -149,9 +149,11 @@ class ScrawlTool(SelectTool):
             self.w.pen_size_text.set(self.pen_size)
             self.prev_location = None
         Glyphs.addCallback(self.update, UPDATEINTERFACE)
+        Glyphs.addCallback(self.mouseDidMove_, MOUSEMOVED)
 
     @objc.python_method
     def deactivate(self):
+        Glyphs.removeCallback(self.mouseDidMove_)
         Glyphs.removeCallback(self.update)
 
     @objc.python_method
@@ -284,6 +286,9 @@ class ScrawlTool(SelectTool):
             NSGraphicsContext.restoreGraphicsState()
             self.prev_location = loc_pixel
         return True
+
+    def mouseDidMove_(self, event):
+        Glyphs.redraw()
 
     def mouseDown_(self, event):
         if event.clickCount() == 3:
