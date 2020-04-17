@@ -20,6 +20,7 @@ TypeCooker™-style drawing for Glyphs.app
 * Press E to switch between Draw and Erase modes
 * Press 1–9 to quickly adjust the drawing tool size (check context menu for wider size range)
 * You can view the scrawl in other tools by activating the Scrawl Reporter via menu _View > Show Scrawl_
+* Change the ratio of vertical pen size relative to horizontal pen size by adding a custom parameter called "ScrawlPenRatio" to a master. A value of 1.0 means the pen is an exact circle.
 
 ## Bugs
 
