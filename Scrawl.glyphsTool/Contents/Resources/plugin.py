@@ -83,7 +83,10 @@ class ScrawlTool(SelectTool):
             callback=self.slider_callback,
             sizeStyle="small",
         )
-        self.w.pen_size_text = TextBox((-50, y + 3, -20, 17), "%s" % default_pen_size)
+        self.w.pen_size_text = TextBox(
+            (-50, y + 3, -20, 17),
+            "%s" % default_pen_size
+        )
 
         self.generalContextMenus = [
             {
@@ -177,7 +180,9 @@ class ScrawlTool(SelectTool):
         if self.data is None:
             return
         NSGraphicsContext.saveGraphicsState()
-        NSGraphicsContext.currentContext().setImageInterpolation_(NSImageInterpolationNone)
+        NSGraphicsContext.currentContext().setImageInterpolation_(
+            NSImageInterpolationNone
+        )
         self.data.drawInRect_(self.rect)
         NSGraphicsContext.restoreGraphicsState()
 
@@ -191,7 +196,10 @@ class ScrawlTool(SelectTool):
             self.erase = not(self.erase)
             self.prev_location = None
             self.updateView()
-        elif event.characters() in ("1", "2", "3", "4", "5", "6", "7", "8", "9"):
+        elif event.characters() in (
+            "1", "2", "3", "4", "5",
+            "6", "7", "8", "9"
+        ):
             self.pen_size = int(event.characters()) * self.pixel_size
             self.w.pen_size.set(self.pen_size)
             self.w.pen_size_text.set(self.pen_size)
@@ -224,7 +232,9 @@ class ScrawlTool(SelectTool):
         if self.prev_location != loc_pixel:
             x, y = loc_pixel
             current = NSGraphicsContext.currentContext()
-            context = NSGraphicsContext.graphicsContextWithBitmapImageRep_(self.data)
+            context = NSGraphicsContext.graphicsContextWithBitmapImageRep_(
+                self.data
+            )
             if context is None:
                 self.prev_location = loc_pixel
                 print("Could not get context in setPixel")
@@ -241,7 +251,10 @@ class ScrawlTool(SelectTool):
                 path = NSBezierPath.alloc().init()
                 path.setLineCapStyle_(NSRoundLineCapStyle)
                 path.setLineWidth_(effective_size)
-                # path.strokeLineFromPoint_toPoint_(x, y, x + self.pen_size, y + self.pen_size)
+                # path.strokeLineFromPoint_toPoint_(
+                #     x, y,
+                #     x + self.pen_size, y + self.pen_size
+                # )
                 path.moveToPoint_((px, py))
                 path.lineToPoint_((x, y))
                 path.stroke()
@@ -352,7 +365,9 @@ class ScrawlTool(SelectTool):
         if self.pixel_size is None:
             self.pixel_size = default_pixel_size  # font units
 
-        self.pixel_ratio = self.current_layer.master.customParameters['ScrawlPenRatio']
+        self.pixel_ratio = self.current_layer.master.customParameters[
+            'ScrawlPenRatio'
+        ]
         if self.pixel_ratio is None:
             self.pixel_ratio = default_pixel_ratio
         else:
@@ -396,8 +411,12 @@ class ScrawlTool(SelectTool):
     def saveScrawl(self):
         if self.current_layer is None:
             return
-        self.current_layer.userData["%s.size" % plugin_id] = int(round(self.pen_size))
-        self.current_layer.userData["%s.unit" % plugin_id] = int(round(self.pixel_size))
+        self.current_layer.userData["%s.size" % plugin_id] = int(
+            round(self.pen_size)
+        )
+        self.current_layer.userData["%s.unit" % plugin_id] = int(
+            round(self.pixel_size)
+        )
         if self.data is None:
             del self.current_layer.userData["%s.data" % plugin_id]
             del self.current_layer.userData["%s.rect" % plugin_id]
@@ -408,11 +427,15 @@ class ScrawlTool(SelectTool):
                 self.rect.size.width,
                 self.rect.size.height
             )
-            imgdata = self.data.representationUsingType_properties_(NSPNGFileType, None)
+            imgdata = self.data.representationUsingType_properties_(
+                NSPNGFileType, None
+            )
             # print("Saving PNG with %i bytes ..." % len(imgdata))
             # if len(imgdata) > 2**16:
             #     print("Glyphs Bug: Image is too big to save")
-            #     # imgdata.writeToFile_atomically_(join(dirname(__file__), "test.png"), False)
+            #     # imgdata.writeToFile_atomically_(join(
+            #     #     dirname(__file__), "test.png"
+            #     # ), False)
             self.current_layer.userData["%s.data" % plugin_id] = imgdata
         self.needs_save = False
 
@@ -428,7 +451,10 @@ class ScrawlTool(SelectTool):
     def saveScrawlToBackground(self, layer):
         font = layer.parent.parent
         if font.filepath is None:
-            print("You must save the Glyphs file before a Scrawl background image can be added.")
+            print(
+                "You must save the Glyphs file "
+                "before a Scrawl background image can be added."
+            )
             return
         data = layer.userData["%s.data" % plugin_id]
         pixel_size = layer.userData["%s.unit" % plugin_id]
@@ -448,11 +474,16 @@ class ScrawlTool(SelectTool):
             except:
                 print("Error saving the image file.")
                 return
-            pngdata = imgdata.representationUsingType_properties_(NSPNGFileType, None)
+            pngdata = imgdata.representationUsingType_properties_(
+                NSPNGFileType, None
+            )
             pngdata.writeToFile_atomically_(image_path, False)
             layer.backgroundImage = GSBackgroundImage(image_path)
             layer.backgroundImage.position = NSPoint(
                 rect.origin.x,
                 rect.origin.y
             )
-            layer.backgroundImage.scale = (float(pixel_size), float(pixel_size * pixel_ratio))
+            layer.backgroundImage.scale = (
+                float(pixel_size),
+                float(pixel_size * pixel_ratio)
+            )
