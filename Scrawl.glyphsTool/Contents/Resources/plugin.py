@@ -3,8 +3,8 @@ from __future__ import division, print_function, unicode_literals
 
 import objc
 from os.path import dirname, join
-from GlyphsApp import Glyphs, UPDATEINTERFACE
-from GlyphsApp.plugins import GSBackgroundImage, SelectTool
+from GlyphsApp import Glyphs, GSBackgroundImage, UPDATEINTERFACE
+from GlyphsApp.plugins import SelectTool
 
 from AppKit import NSBezierPath, NSBitmapImageRep, NSColor, \
     NSDeviceWhiteColorSpace, NSDeviceRGBColorSpace, NSGraphicsContext, \
