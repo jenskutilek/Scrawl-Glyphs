@@ -58,6 +58,7 @@ def initImage(layer, width, height, pixel_size=default_pixel_size, ratio=1):
 
 class ScrawlTool(SelectTool):
 
+    @objc.python_method
     def settings(self):
         from vanilla import Group, Slider, TextBox, Window
         self.name = 'Scrawl'
@@ -127,9 +128,11 @@ class ScrawlTool(SelectTool):
         self.needs_save = False
         self.current_layer = self.get_current_layer()
 
+    @objc.python_method
     def start(self):
         pass
 
+    @objc.python_method
     def get_current_layer(self):
         try:
             editView = self.editViewController().graphicView()
@@ -137,6 +140,7 @@ class ScrawlTool(SelectTool):
             return None
         return editView.activeLayer()
 
+    @objc.python_method
     def activate(self):
         self.current_layer = self.get_current_layer()
         if self.current_layer is not None:
@@ -146,9 +150,11 @@ class ScrawlTool(SelectTool):
             self.prev_location = None
         Glyphs.addCallback(self.update, UPDATEINTERFACE)
 
+    @objc.python_method
     def deactivate(self):
         Glyphs.removeCallback(self.update)
 
+    @objc.python_method
     def foreground(self, layer):
         try:
             self.mouse_position = self.editViewController().graphicView().getActiveLocation_(Glyphs.currentEvent())
@@ -174,6 +180,7 @@ class ScrawlTool(SelectTool):
                 NSColor.lightGrayColor().set()
             path.stroke()
 
+    @objc.python_method
     def background(self, layer):
         self.layer = layer
         # draw pixels
@@ -207,6 +214,7 @@ class ScrawlTool(SelectTool):
         else:
             objc.super(ScrawlTool, self).keyDown_(event)
 
+    @objc.python_method
     def setPixel(self, event, dragging=False):
         if self.data is None:
             return False
@@ -297,10 +305,12 @@ class ScrawlTool(SelectTool):
                 self.saveScrawl()
                 self.updateView()
 
+    @objc.python_method
     def __file__(self):
         """Please leave this method unchanged"""
         return __file__
 
+    @objc.python_method
     def update(self, sender=None):
         cl = self.get_current_layer()
         if cl != self.current_layer:
@@ -313,20 +323,24 @@ class ScrawlTool(SelectTool):
             self.prev_location = None
         self.updateView()
 
+    @objc.python_method
     def updateView(self):
         currentTabView = Glyphs.font.currentTab
         if currentTabView:
             currentTabView.graphicView().setNeedsDisplay_(True)
 
+    @objc.python_method
     def delete_data(self, sender=None):
         for layer in Glyphs.font.selectedLayers:
             self.deleteScrawl(layer)
         self.updateView()
 
+    @objc.python_method
     def save_background(self, sender=None):
         for layer in Glyphs.font.selectedLayers:
             self.saveScrawlToBackground(layer)
 
+    @objc.python_method
     def slider_callback(self, sender=None):
         if sender is not None:
             self.pen_size = int("%i" % sender.get())
@@ -334,6 +348,7 @@ class ScrawlTool(SelectTool):
             self.prev_location = None
             self.updateView()
 
+    @objc.python_method
     def loadDefaultRect(self):
         # Make the default drawing rect based on master and layer dimensions
         font = self.current_layer.parent.parent
@@ -352,6 +367,7 @@ class ScrawlTool(SelectTool):
             2 * pad + upm
         )
 
+    @objc.python_method
     def loadScrawl(self):
         if self.current_layer is None:
             return
@@ -408,6 +424,7 @@ class ScrawlTool(SelectTool):
                 )
         self.needs_save = False
 
+    @objc.python_method
     def saveScrawl(self):
         if self.current_layer is None:
             return
@@ -439,6 +456,7 @@ class ScrawlTool(SelectTool):
             self.current_layer.userData["%s.data" % plugin_id] = imgdata
         self.needs_save = False
 
+    @objc.python_method
     def deleteScrawl(self, layer):
         if layer is None:
             return
@@ -448,6 +466,7 @@ class ScrawlTool(SelectTool):
                 del layer.userData[full_key]
         self.needs_save = False
 
+    @objc.python_method
     def saveScrawlToBackground(self, layer):
         font = layer.parent.parent
         if font.filepath is None:
