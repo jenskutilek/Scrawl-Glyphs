@@ -62,6 +62,7 @@ class ScrawlTool(SelectTool):
     def settings(self):
         from vanilla import Group, Slider, TextBox, Window
         self.name = 'Scrawl'
+        self.toolbarPosition = 113
         self.slider_value = 1  # current slider value
 
         # Create Vanilla window and group with controls
