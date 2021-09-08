@@ -13,9 +13,9 @@
 	<key>CFBundleName</key>
 	<string>Scrawl</string>
 	<key>CFBundleVersion</key>
-	<string>14</string>
+	<string>57</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.5.5</string>
+	<string>0.5.7</string>
 	<key>UpdateFeedURL</key>
 	<string>https://raw.githubusercontent.com/jenskutilek/Scrawl-Glyphs/master/Scrawl.glyphsReporter/Contents/Info.plist</string>
 	<key>productPageURL</key>
