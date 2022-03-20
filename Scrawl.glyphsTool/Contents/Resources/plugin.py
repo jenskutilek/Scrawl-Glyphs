@@ -334,11 +334,13 @@ class ScrawlTool(SelectTool):
         if currentTabView:
             currentTabView.graphicView().setNeedsDisplay_(True)
 
+    @objc.python_method
     def deleteData(self):
         for layer in Glyphs.font.selectedLayers:
             self.deleteScrawl(layer)
         self.updateView()
 
+    @objc.python_method
     def saveBackground(self):
         for layer in Glyphs.font.selectedLayers:
             self.saveScrawlToBackground(layer)
@@ -350,6 +352,7 @@ class ScrawlTool(SelectTool):
             self.prev_location = None
             self.updateView()
 
+    @objc.python_method
     def loadDefaultRect(self):
         # Make the default drawing rect based on master and layer dimensions
         font = self.current_layer.parent.parent
@@ -368,6 +371,7 @@ class ScrawlTool(SelectTool):
             2 * pad + upm
         )
 
+    @objc.python_method
     def loadScrawl(self):
         if self.current_layer is None:
             return
@@ -424,6 +428,7 @@ class ScrawlTool(SelectTool):
                 )
         self.needs_save = False
 
+    @objc.python_method
     def saveScrawl(self):
         if self.current_layer is None:
             return
