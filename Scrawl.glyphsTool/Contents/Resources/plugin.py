@@ -337,7 +337,7 @@ class ScrawlTool(SelectTool):
     def deleteData(self):
         for layer in Glyphs.font.selectedLayers:
             self.deleteScrawl(layer)
-        self.updateView()
+        Glyphs.redraw()
 
     @objc.python_method
     def saveBackground(self):
