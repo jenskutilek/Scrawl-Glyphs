@@ -199,8 +199,7 @@ class ScrawlTool(SelectTool):
     def keyDown_(self, event):
         if event.characters() == "d":
             # Delete the scrawl
-            # FIXME: Doesn't work
-            self.delete_data
+            self.deleteData()
         elif event.characters() == "e":
             # Toggle between draw and eraser mode
             self.erase = not(self.erase)
