@@ -333,13 +333,11 @@ class ScrawlTool(SelectTool):
         if currentTabView:
             currentTabView.graphicView().setNeedsDisplay_(True)
 
-    @objc.python_method
     def deleteData(self):
         for layer in Glyphs.font.selectedLayers:
             self.deleteScrawl(layer)
         Glyphs.redraw()
 
-    @objc.python_method
     def saveBackground(self):
         for layer in Glyphs.font.selectedLayers:
             self.saveScrawlToBackground(layer)
