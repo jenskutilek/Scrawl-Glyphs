@@ -13,7 +13,7 @@
 	<key>CFBundleName</key>
 	<string>Scrawl</string>
 	<key>CFBundleVersion</key>
-	<string>59</string>
+	<string>60</string>
 	<key>CFBundleShortVersionString</key>
 	<string>0.5.9</string>
 	<key>UpdateFeedURL</key>
