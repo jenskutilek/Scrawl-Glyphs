@@ -228,7 +228,7 @@ class ScrawlTool(SelectTool):
         layer = editView.activeLayer()
         try:
             master = layer.parent.parent.masters[layer.layerId]
-        except KeyError:
+        except:
             return False
         if master is None:
             return False
