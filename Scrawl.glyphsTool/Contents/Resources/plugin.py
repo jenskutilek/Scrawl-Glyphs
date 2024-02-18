@@ -201,6 +201,7 @@ class ScrawlTool(SelectTool):
         # draw pixels
         if self.data is None:
             return
+
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.currentContext().setImageInterpolation_(
             NSImageInterpolationNone
@@ -232,6 +233,7 @@ class ScrawlTool(SelectTool):
     def setPixel(self, event, dragging=False) -> bool:
         if self.data is None:
             return False
+
         try:
             editView = self.editViewController().graphicView()
         except:  # noqa: E722
@@ -242,6 +244,7 @@ class ScrawlTool(SelectTool):
             master = layer.font().masters[layer.layerId]
         except:  # noqa: 722
             return False
+
         if master is None:
             return False
 
@@ -261,6 +264,7 @@ class ScrawlTool(SelectTool):
                 self.prev_location = loc_pixel
                 print("Could not get context in setPixel")
                 return False
+
             NSGraphicsContext.saveGraphicsState()
             NSGraphicsContext.setCurrentContext_(context)
             if self.erase:
@@ -306,9 +310,11 @@ class ScrawlTool(SelectTool):
         if event.clickCount() == 3:
             self.mouseTripleDown_(event)
             return
+
         if event.clickCount() == 2:
             self.mouseDoubleDown_(event)
             return
+
         if self.setPixel(event):
             self.updateView()
 
@@ -485,6 +491,7 @@ class ScrawlTool(SelectTool):
                 "before a Scrawl background image can be added."
             )
             return
+
         data = layer.userData[SCRAWL_DATA_KEY]
         pixel_size = layer.userData[SCRAWL_UNIT_KEY]
         pixel_ratio = layer.master.customParameters["ScrawlPenRatio"]
@@ -503,6 +510,7 @@ class ScrawlTool(SelectTool):
             except:  # noqa: E722
                 print("Error saving the image file.")
                 return
+
             pngdata = imgdata.representationUsingType_properties_(
                 NSPNGFileType, None
             )

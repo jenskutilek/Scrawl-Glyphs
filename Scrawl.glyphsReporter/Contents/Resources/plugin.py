@@ -33,6 +33,13 @@ class ScrawlReporter(ReporterPlugin):
                 return
 
         self.draw_layer(layer)
+    @objc.python_method
+    def inactiveLayerBackground(self, layer) -> None:
+        # In inactive layers, show only if the layer has neither components nor paths
+        if layer.shapes:
+            return
+
+        self.draw_layer(layer)
 
     @objc.python_method
     def preview(self, layer) -> None:
