@@ -10,6 +10,8 @@ from AppKit import NSClassFromString, NSCompositeSourceOver, \
 
 
 plugin_id = "de.kutilek.scrawl"
+SCRAWL_DATA_KEY = f"{plugin_id}.data"
+SCRAWL_RECT_KEY = f"{plugin_id}.rect"
 
 
 class ScrawlReporter(ReporterPlugin):
@@ -47,7 +49,7 @@ class ScrawlReporter(ReporterPlugin):
     def draw_layer(self, layer) -> None:
         # draw pixels
 
-        data = layer.userData["%s.data" % plugin_id]
+        data = layer.userData[SCRAWL_DATA_KEY]
         if data is None:
             return
         try:
@@ -56,7 +58,7 @@ class ScrawlReporter(ReporterPlugin):
             print("Error in image data of layer %s" % layer)
             return
 
-        rect = layer.userData["%s.rect" % plugin_id]
+        rect = layer.userData[SCRAWL_RECT_KEY]
         if rect is None:
             # The drawing rect was not stored in user data.
             # Deduce it from the layer/font metrics.
