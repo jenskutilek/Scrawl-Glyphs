@@ -37,8 +37,8 @@ def initImage(
         round(width / pixel_size),   # pixelsWide
         round(height / pixel_size / ratio),  # pixelsHigh
         8,       # bitsPerSample: 1, 2, 4, 8, 12, or 16
-        1,       # samplesPerPixel: 1 - 5
-        False,   # hasAlpha
+        2,       # samplesPerPixel: 1 - 5
+        True,   # hasAlpha
         False,   # isPlanar
         NSDeviceWhiteColorSpace,  # colorSpaceName
         # NSDeviceRGBColorSpace,
@@ -57,13 +57,12 @@ def initImage(
         NSNamedColorSpace
         NSCustomColorSpace
     """
-    # The image is filled black for some reason, make it white
+    # Fill the image data by drawing a transparent rectangle
     current = NSGraphicsContext.currentContext()
     context = NSGraphicsContext.graphicsContextWithBitmapImageRep_(img)
     NSGraphicsContext.setCurrentContext_(context)
-    NSColor.whiteColor().set()
-    # NSBezierPath.setLineWidth_(1)
-    NSBezierPath.fillRect_(NSMakeRect(0, 0, width, int(round(height / ratio))))
+    NSColor.clearColor().set()
+    NSBezierPath.fillRect_(NSMakeRect(0, 0, width, round(height / ratio)))
     NSGraphicsContext.setCurrentContext_(current)
     return img
 
@@ -269,6 +268,8 @@ class ScrawlTool(SelectTool):
             NSGraphicsContext.setCurrentContext_(context)
             if self.erase:
                 NSColor.whiteColor().set()
+                # FIXME: How to erase properly?
+                # NSColor.clearColor().set()
             else:
                 NSColor.blackColor().set()
             effective_size = self.pen_size / self.pixel_size
