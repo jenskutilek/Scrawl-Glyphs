@@ -235,7 +235,7 @@ class ScrawlTool(SelectTool):
         layer = editView.activeLayer()
         try:
             master = layer.font().masters[layer.layerId]
-        except:
+        except:  # noqa: 722
             return False
         if master is None:
             return False
