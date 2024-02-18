@@ -8,6 +8,9 @@ from AppKit import NSClassFromString, NSCompositeSourceOver, \
     NSGraphicsContext, NSImage, NSImageInterpolationNone, NSMakeRect, \
     NSZeroRect
 
+# For debugging
+# from AppKit import NSColor, NSBezierPath, NSPoint
+
 
 plugin_id = "de.kutilek.scrawl"
 SCRAWL_DATA_KEY = f"{plugin_id}.data"
@@ -33,6 +36,9 @@ class ScrawlReporter(ReporterPlugin):
                 return
 
         self.draw_layer(layer)
+        # NSColor.controlTextColor().set()
+        # self.drawTextAtPoint("background", NSPoint(0, 0))
+
     @objc.python_method
     def inactiveLayerBackground(self, layer) -> None:
         # In inactive layers, show only if the layer has neither components nor paths
@@ -40,6 +46,8 @@ class ScrawlReporter(ReporterPlugin):
             return
 
         self.draw_layer(layer)
+        # NSColor.controlTextColor().set()
+        # self.drawTextAtPoint("inactiveLayerBackground", NSPoint(0, -10))
 
     @objc.python_method
     def preview(self, layer) -> None:
@@ -48,6 +56,8 @@ class ScrawlReporter(ReporterPlugin):
             return
 
         self.draw_layer(layer)
+        # NSColor.controlTextColor().set()
+        # self.drawTextAtPoint("preview", NSPoint(0, -10))
 
     @objc.python_method
     def draw_layer(self, layer) -> None:
