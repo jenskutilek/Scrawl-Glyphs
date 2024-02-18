@@ -18,7 +18,7 @@ class ScrawlReporter(ReporterPlugin):
 
     @objc.python_method
     def settings(self) -> None:
-        self.menuName = Glyphs.localize({"en": u"Scrawl"})
+        self.menuName = Glyphs.localize({"en": "Scrawl"})
 
     @objc.python_method
     def background(self, layer) -> None:
