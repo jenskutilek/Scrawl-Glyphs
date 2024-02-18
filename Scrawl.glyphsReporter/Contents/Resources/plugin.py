@@ -4,7 +4,6 @@ import objc
 from GlyphsApp import Glyphs
 from GlyphsApp.plugins import ReporterPlugin
 
-
 from AppKit import NSClassFromString, NSCompositeSourceOver, \
     NSGraphicsContext, NSImage, NSImageInterpolationNone, NSMakeRect, \
     NSZeroRect
@@ -20,7 +19,7 @@ class ScrawlReporter(ReporterPlugin):
         self.menuName = Glyphs.localize({'en': u'Scrawl'})
 
     @objc.python_method
-    def background(self, layer):
+    def draw_layer(self, layer) -> None:
 
         # Check if the drawing should be shown
 
@@ -39,7 +38,7 @@ class ScrawlReporter(ReporterPlugin):
             return
         try:
             data = NSImage.alloc().initWithData_(data)
-        except:
+        except:  # noqa: 722
             print("Error in image data of layer %s" % layer)
             return
 

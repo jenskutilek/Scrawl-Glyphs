@@ -1,25 +1,33 @@
 from __future__ import annotations
 
 import objc
+from typing import TYPE_CHECKING
 from os.path import dirname, join
 from GlyphsApp import Glyphs, GSBackgroundImage, MOUSEMOVED, UPDATEINTERFACE
 from GlyphsApp.plugins import SelectTool
 
 from AppKit import NSBezierPath, NSBitmapImageRep, NSColor, \
-    NSDeviceWhiteColorSpace, NSDeviceRGBColorSpace, NSGraphicsContext, \
+    NSDeviceWhiteColorSpace, NSGraphicsContext, \
     NSImageColorSyncProfileData, NSImageInterpolationNone, NSMakeRect, \
     NSPNGFileType, NSPoint, NSRoundLineCapStyle
 
+if TYPE_CHECKING:
+    from GlyphsApp import GSLayer
 
 plugin_id = "de.kutilek.scrawl"
-default_pen_size = 2
-default_pixel_size = 2
-default_pixel_ratio = 1
+default_pen_size: int = 2
+default_pixel_size: int = 2
+default_pixel_ratio: float = 1
 
 
-def initImage(layer, width, height, pixel_size=default_pixel_size, ratio=1):
+def initImage(
+        width: int,
+        height: int,
+        pixel_size: int = default_pixel_size,
+        ratio: float = 1
+) -> NSBitmapImageRep:
     # See https://developer.apple.com/documentation/appkit/nsbitmapimagerep/1395538-init
-    img = NSBitmapImageRep.alloc().initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bitmapFormat_bytesPerRow_bitsPerPixel_(
+    img = NSBitmapImageRep.alloc().initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bitmapFormat_bytesPerRow_bitsPerPixel_(  # noqa: E501
         None,    # BitmapDataPlanes
         int(round(width / pixel_size)),   # pixelsWide
         int(round(height / pixel_size / ratio)),  # pixelsHigh
@@ -58,7 +66,7 @@ def initImage(layer, width, height, pixel_size=default_pixel_size, ratio=1):
 class ScrawlTool(SelectTool):
 
     @objc.python_method
-    def settings(self):
+    def settings(self) -> None:
         from vanilla import Group, Slider, TextBox, Window
         self.name = 'Scrawl'
         self.toolbarPosition = 113
@@ -129,19 +137,19 @@ class ScrawlTool(SelectTool):
         self.current_layer = self.get_current_layer()
 
     @objc.python_method
-    def start(self):
+    def start(self) -> None:
         pass
 
     @objc.python_method
-    def get_current_layer(self):
+    def get_current_layer(self) -> GSLayer | None:
         try:
             editView = self.editViewController().graphicView()
-        except:
+        except:  # noqa: E722
             return None
         return editView.activeLayer()
 
     @objc.python_method
-    def activate(self):
+    def activate(self) -> None:
         self.current_layer = self.get_current_layer()
         if self.current_layer is not None:
             self.loadScrawl()
@@ -152,15 +160,16 @@ class ScrawlTool(SelectTool):
         Glyphs.addCallback(self.mouseDidMove_, MOUSEMOVED)
 
     @objc.python_method
-    def deactivate(self):
+    def deactivate(self) -> None:
         Glyphs.removeCallback(self.mouseDidMove_)
         Glyphs.removeCallback(self.update)
 
     @objc.python_method
-    def foreground(self, layer):
+    def foreground(self, layer) -> None:
         try:
-            self.mouse_position = self.editViewController().graphicView().getActiveLocation_(Glyphs.currentEvent())
-        except:
+            self.mouse_position = self.editViewController(
+            ).graphicView().getActiveLocation_(Glyphs.currentEvent())
+        except:  # noqa: E722
             # self.logToConsole("foreground: mouse_position: %s" % str(e))
             self.mouse_position = None
             return
@@ -183,7 +192,7 @@ class ScrawlTool(SelectTool):
             path.stroke()
 
     @objc.python_method
-    def background(self, layer):
+    def background(self, layer) -> None:
         self.layer = layer
         # draw pixels
         if self.data is None:
@@ -195,13 +204,13 @@ class ScrawlTool(SelectTool):
         self.data.drawInRect_(self.rect)
         NSGraphicsContext.restoreGraphicsState()
 
-    def keyDown_(self, event):
+    def keyDown_(self, event) -> None:
         if event.characters() == "d":
             # Delete the scrawl
             self.deleteData()
         elif event.characters() == "e":
             # Toggle between draw and eraser mode
-            self.erase = not(self.erase)
+            self.erase = not (self.erase)
             self.prev_location = None
             self.updateView()
         elif event.characters() in (
@@ -216,12 +225,12 @@ class ScrawlTool(SelectTool):
             objc.super(ScrawlTool, self).keyDown_(event)
 
     @objc.python_method
-    def setPixel(self, event, dragging=False):
+    def setPixel(self, event, dragging=False) -> bool:
         if self.data is None:
             return False
         try:
             editView = self.editViewController().graphicView()
-        except:
+        except:  # noqa: E722
             return False
 
         layer = editView.activeLayer()
@@ -286,10 +295,10 @@ class ScrawlTool(SelectTool):
             self.prev_location = loc_pixel
         return True
 
-    def mouseDidMove_(self, event):
+    def mouseDidMove_(self, event) -> None:
         Glyphs.redraw()
 
-    def mouseDown_(self, event):
+    def mouseDown_(self, event) -> None:
         if event.clickCount() == 3:
             self.mouseTripleDown_(event)
             return
@@ -299,23 +308,23 @@ class ScrawlTool(SelectTool):
         if self.setPixel(event):
             self.updateView()
 
-    def mouseDragged_(self, event):
+    def mouseDragged_(self, event) -> None:
         if self.setPixel(event, True):
             self.updateView()
 
-    def mouseUp_(self, event):
+    def mouseUp_(self, event) -> None:
         if self.setPixel(event):
             if self.needs_save:
                 self.saveScrawl()
                 self.updateView()
 
     @objc.python_method
-    def __file__(self):
+    def __file__(self) -> str:
         """Please leave this method unchanged"""
         return __file__
 
     @objc.python_method
-    def update(self, sender=None):
+    def update(self, sender=None) -> None:
         cl = self.get_current_layer()
         if cl != self.current_layer:
             if self.needs_save:
@@ -327,21 +336,21 @@ class ScrawlTool(SelectTool):
             self.prev_location = None
         self.updateView()
 
-    def updateView(self):
+    def updateView(self) -> None:
         currentTabView = Glyphs.font.currentTab
         if currentTabView:
             currentTabView.graphicView().setNeedsDisplay_(True)
 
-    def deleteData(self):
+    def deleteData(self) -> None:
         for layer in Glyphs.font.selectedLayers:
             self.deleteScrawl(layer)
         Glyphs.redraw()
 
-    def saveBackground(self):
+    def saveBackground(self) -> None:
         for layer in Glyphs.font.selectedLayers:
             self.saveScrawlToBackground(layer)
 
-    def sliderCallback_(self, sender=None):
+    def sliderCallback_(self, sender=None) -> None:
         if sender is not None:
             self.pen_size = int("%i" % sender.get())
             self.w.pen_size_text.set(self.pen_size)
@@ -349,7 +358,7 @@ class ScrawlTool(SelectTool):
             self.updateView()
 
     @objc.python_method
-    def loadDefaultRect(self):
+    def loadDefaultRect(self) -> None:
         # Make the default drawing rect based on master and layer dimensions
         font = self.current_layer.parent.parent
         upm = font.upm
@@ -368,7 +377,7 @@ class ScrawlTool(SelectTool):
         )
 
     @objc.python_method
-    def loadScrawl(self):
+    def loadScrawl(self) -> None:
         if self.current_layer is None:
             return
 
@@ -413,7 +422,7 @@ class ScrawlTool(SelectTool):
                     NSImageColorSyncProfileData,
                     None
                 )
-            except:
+            except:  # noqa: E722
                 print("Error in image data of layer %s" % self.current_layer)
                 self.data = initImage(
                     self.current_layer,
@@ -425,7 +434,7 @@ class ScrawlTool(SelectTool):
         self.needs_save = False
 
     @objc.python_method
-    def saveScrawl(self):
+    def saveScrawl(self) -> None:
         if self.current_layer is None:
             return
         self.current_layer.userData["%s.size" % plugin_id] = int(
@@ -457,7 +466,7 @@ class ScrawlTool(SelectTool):
         self.needs_save = False
 
     @objc.python_method
-    def deleteScrawl(self, layer):
+    def deleteScrawl(self, layer) -> None:
         if layer is None:
             return
         for key in ("data", "unit", "rect", "size"):
@@ -467,7 +476,7 @@ class ScrawlTool(SelectTool):
         self.needs_save = False
 
     @objc.python_method
-    def saveScrawlToBackground(self, layer):
+    def saveScrawlToBackground(self, layer) -> None:
         font = layer.parent.parent
         if font.filepath is None:
             print(
@@ -477,7 +486,7 @@ class ScrawlTool(SelectTool):
             return
         data = layer.userData["%s.data" % plugin_id]
         pixel_size = layer.userData["%s.unit" % plugin_id]
-        pixel_ratio = layer.master.customParameters['ScrawlPenRatio']
+        pixel_ratio = layer.master.customParameters["ScrawlPenRatio"]
         if pixel_ratio is None:
             pixel_ratio = default_pixel_ratio
         else:
@@ -490,7 +499,7 @@ class ScrawlTool(SelectTool):
             ))
             try:
                 imgdata = NSBitmapImageRep.alloc().initWithData_(data)
-            except:
+            except:  # noqa: E722
                 print("Error saving the image file.")
                 return
             pngdata = imgdata.representationUsingType_properties_(
