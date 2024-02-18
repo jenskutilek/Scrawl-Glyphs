@@ -364,7 +364,8 @@ class ScrawlTool(SelectTool):
 
         font = self.current_layer.parent.parent
         upm = font.upm
-        pad = int(round(upm / 10))
+        pad_v = int(round(upm * 0.2))
+        pad_h = int(round(upm * 0.5))
 
         try:
             descender = font.masters[self.current_layer.layerId].descender
@@ -372,10 +373,10 @@ class ScrawlTool(SelectTool):
             descender = int(round(-upm / 5))
 
         self.rect = NSMakeRect(
-            -pad,
-            descender - pad,
-            2 * pad + self.current_layer.width,
-            2 * pad + upm
+            -pad_h,
+            descender - pad_v,
+            2 * pad_h + self.current_layer.width,
+            2 * pad_v + upm
         )
 
     @objc.python_method
