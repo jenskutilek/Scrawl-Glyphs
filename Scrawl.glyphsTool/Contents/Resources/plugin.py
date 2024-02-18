@@ -70,7 +70,9 @@ class ScrawlTool(SelectTool):
         from vanilla import Group, Slider, TextBox, Window
         self.name = "Scrawl"
         self.toolbarPosition = 113
-        self.slider_value = 1  # current slider value
+        self.pen_size = default_pen_size
+        self.pixel_size = default_pixel_size
+        self.pixel_ratio = default_pixel_ratio
 
         # Create Vanilla window and group with controls
         viewWidth = 266
@@ -85,7 +87,7 @@ class ScrawlTool(SelectTool):
             (20, y, -60, 24),
             minValue=1,
             maxValue=256,
-            value=float(self.slider_value),
+            value=self.pen_size,
             tickMarkCount=0,
             # stopOnTickMarks = False,
             # continuuous = True,
@@ -123,9 +125,6 @@ class ScrawlTool(SelectTool):
             #     "action": self.saveBackground
             # },
         ]
-        self.pen_size = default_pen_size
-        self.pixel_size = default_pixel_size
-        self.pixel_ratio = default_pixel_ratio
         self.keyboardShortcut = "c"
         self.rect = NSMakeRect(0, 0, 1000, 1000)
         self.data = None
