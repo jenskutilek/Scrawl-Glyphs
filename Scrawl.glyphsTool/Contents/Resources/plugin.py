@@ -359,6 +359,9 @@ class ScrawlTool(SelectTool):
     @objc.python_method
     def loadDefaultRect(self) -> None:
         # Make the default drawing rect based on master and layer dimensions
+        if self.current_layer is None:
+            return
+
         font = self.current_layer.parent.parent
         upm = font.upm
         pad = int(round(upm / 10))
