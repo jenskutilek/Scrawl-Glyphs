@@ -59,6 +59,16 @@ class ScrawlReporter(ReporterPlugin):
         # NSColor.controlTextColor().set()
         # self.drawTextAtPoint("preview", NSPoint(0, -10))
 
+    def drawBackgroundInPreviewLayer_options_(self, layer, options) -> None:
+        # Preview pane in Glyphs 3.2+
+        # In preview, show only if the layer has neither components nor paths
+        if layer.shapes:
+            return
+
+        self.draw_layer(layer)
+        # NSColor.controlTextColor().set()
+        # self.drawTextAtPoint("preview", NSPoint(0, -10))
+
     @objc.python_method
     def draw_layer(self, layer) -> None:
         # draw pixels
