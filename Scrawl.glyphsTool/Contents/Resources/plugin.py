@@ -68,7 +68,7 @@ class ScrawlTool(SelectTool):
     @objc.python_method
     def settings(self) -> None:
         from vanilla import Group, Slider, TextBox, Window
-        self.name = 'Scrawl'
+        self.name = "Scrawl"
         self.toolbarPosition = 113
         self.slider_value = 1  # current slider value
 
@@ -103,30 +103,30 @@ class ScrawlTool(SelectTool):
             },
             {
                 "name": Glyphs.localize({
-                    'en': 'Delete Scrawl',
-                    'de': 'Gekritzel löschen'
+                    "en": "Delete Scrawl",
+                    "de": "Gekritzel löschen"
                 }),
                 "action": self.deleteData
             },
             {
                 "name": Glyphs.localize({
-                    'en': 'Save Scrawl To Background Image',
-                    'de': 'Gekritzel als Hintergrundbild speichern'
+                    "en": "Save Scrawl To Background Image",
+                    "de": "Gekritzel als Hintergrundbild speichern"
                 }),
                 "action": self.saveBackground
             },
             # {
             #     "name": Glyphs.localize({
-            #         'en': 'Save current size as master default',
-            #         'de': 'Aktuelle Größe als Master-Standard speichern'
+            #         "en": "Save current size as master default",
+            #         "de": "Aktuelle Größe als Master-Standard speichern"
             #     }),
             #     "action": self.saveBackground
             # },
         ]
-        self.keyboardShortcut = 'c'
         self.pen_size = default_pen_size
         self.pixel_size = default_pixel_size
         self.pixel_ratio = default_pixel_ratio
+        self.keyboardShortcut = "c"
         self.rect = NSMakeRect(0, 0, 1000, 1000)
         self.data = None
         self.prev_location = None
@@ -391,7 +391,7 @@ class ScrawlTool(SelectTool):
             self.pixel_size = default_pixel_size  # font units
 
         self.pixel_ratio = self.current_layer.master.customParameters[
-            'ScrawlPenRatio'
+            "ScrawlPenRatio"
         ]
         if self.pixel_ratio is None:
             self.pixel_ratio = default_pixel_ratio
