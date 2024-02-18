@@ -15,8 +15,8 @@ plugin_id = "de.kutilek.scrawl"
 class ScrawlReporter(ReporterPlugin):
 
     @objc.python_method
-    def settings(self):
-        self.menuName = Glyphs.localize({'en': u'Scrawl'})
+    def settings(self) -> None:
+        self.menuName = Glyphs.localize({"en": u"Scrawl"})
 
     @objc.python_method
     def draw_layer(self, layer) -> None:
