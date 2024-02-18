@@ -69,7 +69,7 @@ class ScrawlReporter(ReporterPlugin):
         try:
             data = NSImage.alloc().initWithData_(data)
         except:  # noqa: 722
-            print("Error in image data of layer %s" % layer)
+            print(f"Error in image data of layer {layer}")
             return
 
         rect = layer.userData[SCRAWL_RECT_KEY]
