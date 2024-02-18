@@ -430,7 +430,7 @@ class ScrawlTool(SelectTool):
                     None
                 )
             except:  # noqa: E722
-                print("Error in image data of layer %s" % self.current_layer)
+                print(f"Error in image data of layer {self.current_layer}")
                 self.data = initImage(
                     self.rect.size.width,
                     self.rect.size.height,
