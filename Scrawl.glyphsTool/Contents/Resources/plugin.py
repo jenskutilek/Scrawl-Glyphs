@@ -234,8 +234,8 @@ class ScrawlTool(SelectTool):
 
         layer = editView.activeLayer()
         try:
-            master = layer.parent.parent.masters[layer.layerId]
-        except KeyError:
+            master = layer.font().masters[layer.layerId]
+        except:
             return False
         if master is None:
             return False
