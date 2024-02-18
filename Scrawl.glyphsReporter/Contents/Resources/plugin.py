@@ -91,9 +91,11 @@ class ScrawlReporter(ReporterPlugin):
         NSGraphicsContext.currentContext().setImageInterpolation_(
             NSImageInterpolationNone
         )
-        if len(layer.paths) == 0:
+        if not layer.shapes:
+            # Draw full black when the glyph is empty
             data.drawInRect_(rect)
         else:
+            # Draw with reduced opacity when the glyph has shapes
             data.drawInRect_fromRect_operation_fraction_(
                 rect,
                 NSZeroRect,
