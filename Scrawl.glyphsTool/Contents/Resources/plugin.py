@@ -409,7 +409,6 @@ class ScrawlTool(SelectTool):
         data = self.current_layer.userData["%s.data" % plugin_id]
         if data is None:
             self.data = initImage(
-                self.current_layer,
                 self.rect.size.width,
                 self.rect.size.height,
                 self.pixel_size,
@@ -425,7 +424,6 @@ class ScrawlTool(SelectTool):
             except:  # noqa: E722
                 print("Error in image data of layer %s" % self.current_layer)
                 self.data = initImage(
-                    self.current_layer,
                     self.rect.size.width,
                     self.rect.size.height,
                     self.pixel_size,
