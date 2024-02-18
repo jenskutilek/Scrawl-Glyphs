@@ -19,6 +19,27 @@ class ScrawlReporter(ReporterPlugin):
         self.menuName = Glyphs.localize({"en": u"Scrawl"})
 
     @objc.python_method
+    def background(self, layer) -> None:
+        # Always show the drawing in the current layer background
+        currentController = self.controller.view().window().windowController()
+        if currentController:
+            tool = currentController.toolDrawDelegate()
+            if tool.isKindOfClass_(NSClassFromString("GlyphsToolText")) \
+                    or tool.isKindOfClass_(NSClassFromString("GlyphsToolHand")) \
+                    or tool.isKindOfClass_(NSClassFromString("ScrawlTool")):
+                return
+
+        self.draw_layer(layer)
+
+    @objc.python_method
+    def preview(self, layer) -> None:
+        # In preview, show only if the layer has neither components nor paths
+        if layer.shapes:
+            return
+
+        self.draw_layer(layer)
+
+    @objc.python_method
     def draw_layer(self, layer) -> None:
 
         # Check if the drawing should be shown
