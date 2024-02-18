@@ -373,7 +373,7 @@ class ScrawlTool(SelectTool):
         if self.current_layer is None:
             return
 
-        font = self.current_layer.parent.parent
+        font = self.current_layer.font()
         upm = font.upm
         pad_v = round(upm * 0.2)
         pad_h = round(upm * 0.5)
@@ -484,7 +484,7 @@ class ScrawlTool(SelectTool):
 
     @objc.python_method
     def saveScrawlToBackground(self, layer) -> None:
-        font = layer.parent.parent
+        font = layer.font()
         if font.filepath is None:
             print(
                 "You must save the Glyphs file "

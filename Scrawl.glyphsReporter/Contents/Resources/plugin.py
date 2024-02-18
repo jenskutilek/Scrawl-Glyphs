@@ -66,21 +66,23 @@ class ScrawlReporter(ReporterPlugin):
         if rect is None:
             # The drawing rect was not stored in user data.
             # Deduce it from the layer/font metrics.
-            font = layer.parent.parent
-            pad = int(round(font.upm / 10))
+            font = layer.font()
+            upm = font.upm
+            pad_v = round(upm * 0.2)
+            pad_h = round(upm * 0.5)
 
             # find master for image positioning (descender)
 
             try:
-                descender = layer.parent.parent.masters[layer.layerId].descender
+                descender = font.masters[layer.layerId].descender
             except KeyError:
-                descender = int(round(font.upm / 5))
+                descender = round(-upm * 0.2)
 
-            rect = NSMakeRect(
-                -pad,
-                descender - pad,
-                2 * pad + layer.width,
-                2 * pad + font.upm
+            self.rect = NSMakeRect(
+                -pad_h,
+                descender - pad_v,
+                2 * pad_h + layer.width,
+                2 * pad_v + upm
             )
         else:
             # Use the rect from user data
