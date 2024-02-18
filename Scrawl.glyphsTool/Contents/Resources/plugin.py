@@ -15,6 +15,11 @@ if TYPE_CHECKING:
     from GlyphsApp import GSLayer
 
 plugin_id = "de.kutilek.scrawl"
+SCRAWL_DATA_KEY = f"{plugin_id}.data"
+SCRAWL_RECT_KEY = f"{plugin_id}.rect"
+SCRAWL_SIZE_KEY = f"{plugin_id}.size"
+SCRAWL_UNIT_KEY = f"{plugin_id}.unit"
+
 default_pen_size: int = 2
 default_pixel_size: int = 2
 default_pixel_ratio: float = 1
@@ -384,12 +389,12 @@ class ScrawlTool(SelectTool):
         if self.current_layer is None:
             return
 
-        pen_size = self.current_layer.userData["%s.size" % plugin_id]
+        pen_size = self.current_layer.userData[SCRAWL_SIZE_KEY]
         if pen_size is not None:
             self.pen_size = pen_size  # scrawl pixels
             # Otherwise, keep the previous size
 
-        self.pixel_size = self.current_layer.userData["%s.unit" % plugin_id]
+        self.pixel_size = self.current_layer.userData[SCRAWL_UNIT_KEY]
         if self.pixel_size is None:
             self.pixel_size = default_pixel_size  # font units
 
@@ -402,14 +407,14 @@ class ScrawlTool(SelectTool):
             self.pixel_ratio = float(self.pixel_ratio)
 
         # Drawing rect
-        rect = self.current_layer.userData["%s.rect" % plugin_id]
+        rect = self.current_layer.userData[SCRAWL_RECT_KEY]
         if rect is None:
             self.loadDefaultRect()
         else:
             self.rect = NSMakeRect(*rect)
 
         # Image data
-        data = self.current_layer.userData["%s.data" % plugin_id]
+        data = self.current_layer.userData[SCRAWL_DATA_KEY]
         if data is None:
             self.data = initImage(
                 self.rect.size.width,
@@ -438,17 +443,13 @@ class ScrawlTool(SelectTool):
     def saveScrawl(self) -> None:
         if self.current_layer is None:
             return
-        self.current_layer.userData["%s.size" % plugin_id] = int(
-            round(self.pen_size)
-        )
-        self.current_layer.userData["%s.unit" % plugin_id] = int(
-            round(self.pixel_size)
-        )
+        self.current_layer.userData[SCRAWL_SIZE_KEY] = round(self.pen_size)
+        self.current_layer.userData[SCRAWL_UNIT_KEY] = round(self.pixel_size)
         if self.data is None:
-            del self.current_layer.userData["%s.data" % plugin_id]
-            del self.current_layer.userData["%s.rect" % plugin_id]
+            del self.current_layer.userData[SCRAWL_DATA_KEY]
+            del self.current_layer.userData[SCRAWL_RECT_KEY]
         else:
-            self.current_layer.userData["%s.rect" % plugin_id] = (
+            self.current_layer.userData[SCRAWL_RECT_KEY] = (
                 self.rect.origin.x,
                 self.rect.origin.y,
                 self.rect.size.width,
@@ -463,17 +464,16 @@ class ScrawlTool(SelectTool):
             #     # imgdata.writeToFile_atomically_(join(
             #     #     dirname(__file__), "test.png"
             #     # ), False)
-            self.current_layer.userData["%s.data" % plugin_id] = imgdata
+            self.current_layer.userData[SCRAWL_DATA_KEY] = imgdata
         self.needs_save = False
 
     @objc.python_method
     def deleteScrawl(self, layer) -> None:
         if layer is None:
             return
-        for key in ("data", "unit", "rect", "size"):
-            full_key = "%s.%s" % (plugin_id, key)
-            if layer.userData[full_key] is not None:
-                del layer.userData[full_key]
+        for key in (SCRAWL_DATA_KEY, SCRAWL_RECT_KEY, SCRAWL_SIZE_KEY, SCRAWL_UNIT_KEY):
+            if layer.userData[key] is not None:
+                del layer.userData[key]
         self.needs_save = False
 
     @objc.python_method
@@ -485,14 +485,14 @@ class ScrawlTool(SelectTool):
                 "before a Scrawl background image can be added."
             )
             return
-        data = layer.userData["%s.data" % plugin_id]
-        pixel_size = layer.userData["%s.unit" % plugin_id]
+        data = layer.userData[SCRAWL_DATA_KEY]
+        pixel_size = layer.userData[SCRAWL_UNIT_KEY]
         pixel_ratio = layer.master.customParameters["ScrawlPenRatio"]
         if pixel_ratio is None:
             pixel_ratio = default_pixel_ratio
         else:
             pixel_ratio = float(pixel_ratio)
-        rect = NSMakeRect(*layer.userData["%s.rect" % plugin_id])
+        rect = NSMakeRect(*layer.userData[SCRAWL_RECT_KEY])
         if data is not None:
             image_path = join(dirname(font.filepath), "%s-%s.png" % (
                 layer.layerId,
