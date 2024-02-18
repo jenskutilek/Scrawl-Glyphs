@@ -375,13 +375,13 @@ class ScrawlTool(SelectTool):
 
         font = self.current_layer.parent.parent
         upm = font.upm
-        pad_v = int(round(upm * 0.2))
-        pad_h = int(round(upm * 0.5))
+        pad_v = round(upm * 0.2)
+        pad_h = round(upm * 0.5)
 
         try:
             descender = font.masters[self.current_layer.layerId].descender
         except (AttributeError, KeyError):
-            descender = int(round(-upm / 5))
+            descender = round(-upm * 0.2)
 
         self.rect = NSMakeRect(
             -pad_h,
