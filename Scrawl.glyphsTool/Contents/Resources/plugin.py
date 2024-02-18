@@ -34,8 +34,8 @@ def initImage(
     # See https://developer.apple.com/documentation/appkit/nsbitmapimagerep/1395538-init
     img = NSBitmapImageRep.alloc().initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bitmapFormat_bytesPerRow_bitsPerPixel_(  # noqa: E501
         None,    # BitmapDataPlanes
-        int(round(width / pixel_size)),   # pixelsWide
-        int(round(height / pixel_size / ratio)),  # pixelsHigh
+        round(width / pixel_size),   # pixelsWide
+        round(height / pixel_size / ratio),  # pixelsHigh
         8,       # bitsPerSample: 1, 2, 4, 8, 12, or 16
         1,       # samplesPerPixel: 1 - 5
         False,   # hasAlpha
