@@ -22,17 +22,14 @@ class ScrawlReporter(ReporterPlugin):
 
     @objc.python_method
     def background(self, layer) -> None:
-        # Always show the drawing in the current layer background, except in certain
-        # tools
+        # Always show the drawing in the current layer background, except in some tools
         if self.controller is None:
             return
 
         currentController = self.controller.view().window().windowController()
         if currentController:
             tool = currentController.toolDrawDelegate()
-            if tool.isKindOfClass_(NSClassFromString("GlyphsToolText")) \
-                    or tool.isKindOfClass_(NSClassFromString("GlyphsToolHand")) \
-                    or tool.isKindOfClass_(NSClassFromString("ScrawlTool")):
+            if tool.isKindOfClass_(NSClassFromString("ScrawlTool")):
                 return
 
         self.draw_layer(layer)
